@@ -1,0 +1,2700 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Branderij — Campagne Studio</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --fire: #E8420A;
+  --ember: #FF6B2B;
+  --gold: #D4A843;
+  --coal: #0E0E0E;
+  --ash: #181818;
+  --smoke: #242424;
+  --border: #2C2C2C;
+  --grey: #777;
+  --light: #F0EDE8;
+  --cream: #FAF8F5;
+  --green: #4CAF7D;
+  --amber: #D4A843;
+  --red: #C0392B;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--coal);
+  color: var(--light);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════
+   GRAIN OVERLAY
+═══════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.6;
+}
+
+/* ═══════════════════════════════
+   HEADER
+═══════════════════════════════ */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: rgba(14,14,14,0.95);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 22px;
+  letter-spacing: 4px;
+  color: var(--light);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logo-fire { color: var(--fire); }
+
+.logo-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+}
+
+.logo-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--grey);
+  font-weight: 400;
+}
+
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-tab {
+  background: none;
+  border: none;
+  padding: 8px 20px;
+  color: var(--grey);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.nav-tab:hover { color: var(--light); background: var(--smoke); }
+
+.nav-tab.active {
+  color: var(--light);
+  background: var(--smoke);
+}
+
+.nav-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -1px;
+  left: 20px;
+  right: 20px;
+  height: 2px;
+  background: var(--fire);
+  border-radius: 2px 2px 0 0;
+}
+
+.opus-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(232,66,10,0.1);
+  border: 1px solid rgba(232,66,10,0.3);
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ember);
+  letter-spacing: 1px;
+}
+
+.opus-dot {
+  width: 6px; height: 6px;
+  background: var(--fire);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+/* ═══════════════════════════════
+   TABS CONTENT
+═══════════════════════════════ */
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* ═══════════════════════════════
+   GENERATOR TAB
+═══════════════════════════════ */
+.generator-layout {
+  display: grid;
+  grid-template-columns: 380px 1fr;
+  min-height: calc(100vh - 64px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--ash);
+  border-right: 1px solid var(--border);
+  padding: 32px 28px;
+  overflow-y: auto;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+}
+
+.sidebar-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--fire);
+  margin-bottom: 24px;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-label {
+  display: block;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--grey);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+}
+
+.form-input, .form-select, .form-textarea {
+  width: 100%;
+  background: var(--smoke);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 11px 14px;
+  color: var(--light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus { border-color: var(--fire); }
+
+.form-input::placeholder,
+.form-textarea::placeholder { color: #444; }
+
+.form-textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
+
+.form-select { cursor: pointer; }
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip {
+  background: var(--smoke);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 6px 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--grey);
+  cursor: pointer;
+  transition: all 0.15s;
+  letter-spacing: 0.5px;
+  user-select: none;
+}
+
+.chip:hover { border-color: var(--ember); color: var(--ember); }
+.chip.selected { background: rgba(232,66,10,0.15); border-color: var(--fire); color: var(--ember); }
+
+.btn-generate {
+  width: 100%;
+  background: var(--fire);
+  border: none;
+  border-radius: 4px;
+  padding: 16px;
+  color: white;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 3px;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 8px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-generate::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.5s;
+}
+
+.btn-generate:hover { background: var(--ember); }
+.btn-generate:hover::before { transform: translateX(100%); }
+.btn-generate:disabled { background: #333; color: #666; cursor: not-allowed; }
+
+.form-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 24px 0;
+}
+
+/* MAIN OUTPUT AREA */
+.output-area {
+  padding: 40px;
+  overflow-y: auto;
+}
+
+/* EMPTY STATE */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+  color: var(--grey);
+}
+
+.empty-flame {
+  font-size: 64px;
+  margin-bottom: 24px;
+  filter: grayscale(0.5);
+  animation: flicker 3s ease-in-out infinite;
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1) rotate(-1deg); }
+  50% { transform: scale(1.05) rotate(1deg); }
+}
+
+.empty-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  letter-spacing: 3px;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.empty-sub { font-size: 14px; color: #444; line-height: 1.6; }
+
+/* LOADING */
+.loading-state {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 60vh;
+  text-align: center;
+}
+
+.loading-state.visible { display: flex; }
+
+.loading-bars {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 32px;
+}
+
+.loading-bar {
+  width: 4px;
+  height: 40px;
+  background: var(--fire);
+  border-radius: 2px;
+  animation: loadbar 1.2s ease-in-out infinite;
+}
+
+.loading-bar:nth-child(2) { animation-delay: 0.1s; height: 56px; }
+.loading-bar:nth-child(3) { animation-delay: 0.2s; height: 32px; }
+.loading-bar:nth-child(4) { animation-delay: 0.3s; height: 64px; }
+.loading-bar:nth-child(5) { animation-delay: 0.4s; height: 24px; }
+
+@keyframes loadbar {
+  0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+  50% { opacity: 1; transform: scaleY(1); }
+}
+
+.loading-text {
+  font-family: 'DM Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  color: var(--grey);
+}
+
+.loading-sub {
+  font-size: 13px;
+  color: #444;
+  margin-top: 8px;
+}
+
+/* RESULTS */
+.results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.results-title {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 13px;
+  letter-spacing: 4px;
+  color: var(--fire);
+}
+
+.results-meta {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  color: var(--grey);
+}
+
+.concepts-grid {
+  display: grid;
+  gap: 24px;
+}
+
+/* CONCEPT CARD */
+.concept-card {
+  background: var(--ash);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  animation: cardIn 0.4s ease both;
+}
+
+.concept-card:nth-child(2) { animation-delay: 0.1s; }
+.concept-card:nth-child(3) { animation-delay: 0.2s; }
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.concept-header {
+  padding: 24px 28px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.concept-number {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--fire);
+  margin-bottom: 8px;
+}
+
+.concept-name {
+  font-family: 'Instrument Serif', serif;
+  font-size: 26px;
+  color: var(--light);
+  line-height: 1.2;
+  margin-bottom: 6px;
+}
+
+.concept-tagline {
+  font-size: 14px;
+  color: var(--grey);
+  font-style: italic;
+}
+
+.concept-feasibility {
+  flex-shrink: 0;
+  text-align: center;
+}
+
+.feas-icon { font-size: 28px; }
+
+.feas-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--grey);
+  display: block;
+  margin-top: 4px;
+  letter-spacing: 1px;
+}
+
+.concept-body {
+  padding: 24px 28px;
+}
+
+.concept-section {
+  margin-bottom: 20px;
+}
+
+.concept-section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--fire);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.concept-text {
+  font-size: 14px;
+  color: #BBB;
+  line-height: 1.7;
+}
+
+.concept-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.ctag {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+}
+
+.ctag-trigger { background: rgba(192,57,43,0.15); color: #E87D7D; border: 1px solid rgba(192,57,43,0.3); }
+.ctag-kanaal { background: rgba(52,152,219,0.12); color: #7BB8E8; border: 1px solid rgba(52,152,219,0.25); }
+.ctag-format { background: rgba(212,168,67,0.12); color: #D4A843; border: 1px solid rgba(212,168,67,0.25); }
+
+.concept-grid-inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.concept-block {
+  background: var(--smoke);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.concept-block-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--grey);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.concept-block-value {
+  font-size: 13px;
+  color: var(--light);
+  line-height: 1.6;
+}
+
+.price-highlight {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 28px;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.price-sub {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--grey);
+}
+
+/* INSPIRATION REFS */
+.inspiration-strip {
+  background: rgba(232,66,10,0.06);
+  border-top: 1px solid rgba(232,66,10,0.15);
+  padding: 16px 28px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.inspiration-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--grey);
+  letter-spacing: 1px;
+  flex-shrink: 0;
+}
+
+.inspiration-ref {
+  background: rgba(232,66,10,0.1);
+  border: 1px solid rgba(232,66,10,0.2);
+  border-radius: 3px;
+  padding: 4px 10px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--ember);
+}
+
+/* ERROR STATE */
+.error-state {
+  background: rgba(192,57,43,0.1);
+  border: 1px solid rgba(192,57,43,0.3);
+  border-radius: 6px;
+  padding: 24px;
+  text-align: center;
+  color: #E87D7D;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════
+   LIBRARY TAB
+═══════════════════════════════ */
+.library-layout { padding: 0; }
+
+.lib-controls {
+  background: var(--ash);
+  padding: 20px 40px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  position: sticky;
+  top: 64px;
+  z-index: 50;
+}
+
+.search-wrap {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-wrap input {
+  width: 100%;
+  background: var(--smoke);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px 10px 36px;
+  color: var(--light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-wrap input:focus { border-color: var(--fire); }
+.search-wrap input::placeholder { color: #444; }
+.search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #555; font-size: 14px; }
+
+.lib-select {
+  background: var(--smoke);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--light);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+}
+
+.lib-select:focus { border-color: var(--fire); }
+
+.btn-reset {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 16px;
+  color: var(--grey);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-reset:hover { border-color: var(--fire); color: var(--fire); }
+
+.lib-stats {
+  padding: 10px 40px;
+  background: #111;
+  border-bottom: 1px solid #1A1A1A;
+  display: flex;
+  gap: 24px;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: var(--grey);
+  flex-wrap: wrap;
+}
+
+.lib-stat strong { color: var(--light); }
+
+.lib-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 14px;
+  padding: 28px 40px;
+  max-width: 1800px;
+}
+
+/* LIB CARD */
+.lib-card {
+  background: var(--ash);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px;
+  transition: border-color 0.2s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+  cursor: default;
+}
+
+.lib-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: var(--fire);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.3s;
+}
+
+.lib-card:hover { border-color: #3A3A3A; transform: translateY(-1px); }
+.lib-card:hover::before { transform: scaleX(1); }
+
+.lib-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 10px;
+}
+
+.lib-brand {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 18px;
+  letter-spacing: 1px;
+  color: var(--light);
+}
+
+.lib-feas { font-size: 16px; }
+
+.lib-campaign-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ember);
+  margin-bottom: 8px;
+}
+
+.lib-mechanism {
+  font-size: 12px;
+  color: #999;
+  line-height: 1.55;
+  margin-bottom: 12px;
+}
+
+.lib-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ltag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 3px 7px;
+  border-radius: 2px;
+  letter-spacing: 0.3px;
+}
+
+.ltag-sector { background: #1A2A1A; color: #6BAF6B; border: 1px solid #253A25; }
+.ltag-kanaal { background: #161E2E; color: #6B9BB8; border: 1px solid #222E4A; }
+.ltag-trigger { background: #261616; color: #B87070; border: 1px solid #3A2222; }
+.ltag-format { background: #262616; color: #B8B070; border: 1px solid #3A3A22; }
+
+.lib-card-footer {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid #222;
+  display: flex;
+  justify-content: space-between;
+}
+
+.lib-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: #333;
+}
+
+.lib-feas-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+}
+
+.lf-yes { color: #6BAF6B; }
+.lf-adapt { color: var(--gold); }
+.lf-no { color: #AF6B6B; }
+
+.lib-empty {
+  grid-column: 1/-1;
+  text-align: center;
+  padding: 80px;
+  color: #333;
+}
+
+/* EXPORT */
+.export-bar {
+  padding: 16px 40px;
+  background: #111;
+  border-top: 1px solid #1A1A1A;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.btn-export {
+  background: var(--fire);
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  color: white;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-export:hover { background: var(--ember); }
+
+/* ═══════════════════════════════
+   COMPOUND OPTIMALISATIE
+═══════════════════════════════ */
+.compound-trigger {
+  padding: 20px 28px;
+  border-top: 1px solid var(--border);
+  background: rgba(212,168,67,0.04);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.btn-compound {
+  background: linear-gradient(135deg, #1A1A0A, #2A2A10);
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  padding: 12px 24px;
+  color: var(--gold);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 15px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-compound:hover { background: rgba(212,168,67,0.15); box-shadow: 0 0 16px rgba(212,168,67,0.2); }
+.btn-compound:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.compound-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: #555;
+  letter-spacing: 1px;
+}
+
+.compound-rapport { border-top: 2px solid var(--gold); background: #111; }
+
+.cr-header {
+  padding: 24px 28px 16px;
+  border-bottom: 1px solid #222;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.cr-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--gold); }
+.cr-meta { font-family: 'DM Mono', monospace; font-size: 10px; color: #555; margin-top: 6px; line-height: 1.8; }
+
+.cr-score-wrap { text-align: center; flex-shrink: 0; }
+.cr-score-num { font-family: 'Bebas Neue', sans-serif; font-size: 52px; line-height: 1; color: var(--gold); }
+.cr-score-max { font-family: 'DM Mono', monospace; font-size: 10px; color: #555; }
+
+.cr-progress {
+  margin: 0 28px 20px;
+  height: 4px;
+  background: #222;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.cr-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--ember));
+  border-radius: 2px;
+  transition: width 1s ease;
+}
+
+.cr-section { padding: 20px 28px; border-bottom: 1px solid #1A1A1A; }
+
+.cr-section-title {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cr-count-badge {
+  background: rgba(212,168,67,0.15);
+  border: 1px solid rgba(212,168,67,0.3);
+  border-radius: 2px;
+  padding: 2px 8px;
+  font-size: 10px;
+  color: var(--gold);
+}
+
+.cr-discipline {
+  margin-bottom: 12px;
+  background: #181818;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.cr-disc-header {
+  padding: 10px 16px;
+  background: #1C1C1C;
+  border-bottom: 1px solid #252525;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cr-disc-name { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--light); }
+.cr-disc-score { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--gold); }
+.cr-disc-bar { height: 3px; background: #111; }
+.cr-disc-bar-fill { height: 100%; background: var(--gold); }
+
+.cr-items { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+
+.cr-item {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.cr-item-num { font-family: 'DM Mono', monospace; font-size: 10px; color: #444; padding-top: 1px; }
+.cr-item-text { color: #BBB; }
+
+.cr-tool-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  background: rgba(76,175,125,0.1);
+  color: #4CAF7D;
+  border: 1px solid rgba(76,175,125,0.2);
+}
+
+.cr-skip-tag {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  background: rgba(120,120,120,0.08);
+  color: #666;
+  border: 1px solid #333;
+}
+
+.cr-skip-item {
+  display: grid;
+  grid-template-columns: 32px 1fr auto;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  line-height: 1.5;
+  opacity: 0.5;
+}
+
+.cr-tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.cr-tool-card {
+  background: #181818;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  padding: 14px;
+}
+
+.cr-tool-name { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 600; color: var(--light); margin-bottom: 2px; }
+.cr-tool-disc { font-family: 'DM Mono', monospace; font-size: 9px; color: #555; margin-bottom: 8px; letter-spacing: 1px; }
+.cr-tool-cost { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--gold); margin-bottom: 6px; }
+.cr-tool-use { font-size: 11px; color: #888; line-height: 1.4; margin-bottom: 8px; }
+
+.fits-yes { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 9px; background: rgba(76,175,125,0.1); color: #4CAF7D; border: 1px solid rgba(76,175,125,0.2); }
+.fits-no { display: inline-block; padding: 2px 8px; border-radius: 2px; font-family: 'DM Mono', monospace; font-size: 9px; background: rgba(192,57,43,0.08); color: #C47B7B; border: 1px solid rgba(192,57,43,0.2); }
+
+.cr-impact-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.cr-impact-item {
+  background: #181818;
+  border: 1px solid #252525;
+  border-radius: 6px;
+  padding: 16px;
+  text-align: center;
+}
+
+.cr-impact-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); letter-spacing: 1px; }
+.cr-impact-lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: #555; letter-spacing: 1px; margin-top: 4px; }
+.cr-impact-desc { font-size: 11px; color: #888; margin-top: 6px; line-height: 1.4; }
+
+.cr-loading {
+  padding: 40px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.cr-loading-bars { display: flex; gap: 4px; }
+.cr-lb { width: 3px; height: 28px; background: var(--gold); border-radius: 2px; animation: loadbar 1.2s ease-in-out infinite; }
+.cr-lb:nth-child(2) { animation-delay:0.1s; height:36px; }
+.cr-lb:nth-child(3) { animation-delay:0.2s; height:20px; }
+.cr-lb:nth-child(4) { animation-delay:0.3s; height:40px; }
+.cr-lb:nth-child(5) { animation-delay:0.4s; height:16px; }
+
+.cr-loading-text { font-family:'DM Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--gold); }
+.cr-loading-sub { font-size:12px; color:#444; }
+
+.form-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.btn-ai-lookup {
+  background: rgba(232,66,10,0.1);
+  border: 1px solid rgba(232,66,10,0.3);
+  border-radius: 3px;
+  padding: 3px 10px;
+  color: var(--ember);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-ai-lookup:hover { background: rgba(232,66,10,0.2); border-color: var(--fire); }
+.btn-ai-lookup:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.ai-field-wrap { position: relative; }
+
+.ai-result {
+  display: none;
+  margin-top: 6px;
+  padding: 8px 12px;
+  background: rgba(232,66,10,0.06);
+  border: 1px solid rgba(232,66,10,0.2);
+  border-radius: 4px;
+  font-size: 12px;
+  color: #BBB;
+  line-height: 1.5;
+}
+
+.ai-result.visible { display: block; }
+
+.ai-result-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.btn-ai-accept {
+  background: var(--fire);
+  border: none;
+  border-radius: 3px;
+  padding: 4px 12px;
+  color: white;
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.btn-ai-reject {
+  background: transparent;
+  border: 1px solid #444;
+  border-radius: 3px;
+  padding: 4px 12px;
+  color: var(--grey);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  cursor: pointer;
+  letter-spacing: 1px;
+}
+
+.form-hint {
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  color: var(--fire);
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+  opacity: 0.7;
+}
+
+/* BUDGET TOGGLE */
+.budget-toggle {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 2px;
+}
+
+.btog {
+  flex: 1;
+  background: var(--smoke);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 7px 8px;
+  color: var(--grey);
+  font-family: 'DM Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.btog.active {
+  background: rgba(232,66,10,0.12);
+  border-color: var(--fire);
+  color: var(--ember);
+}
+
+/* AI chip */
+.chip-ai {
+  background: rgba(232,66,10,0.1) !important;
+  border-color: rgba(232,66,10,0.3) !important;
+  color: var(--ember) !important;
+}
+
+.chip-ai.selected {
+  background: rgba(232,66,10,0.2) !important;
+  border-color: var(--fire) !important;
+  color: var(--ember) !important;
+}
+
+/* grouped optgroup styling via dark bg */
+optgroup { background: #1C1C1C; color: var(--grey); font-style: normal; font-size: 11px; }
+  .generator-layout { grid-template-columns: 1fr; }
+  .sidebar { position: static; height: auto; }
+  .concept-grid-inner { grid-template-columns: 1fr; }
+  header { padding: 0 16px; }
+  .logo-sub { display: none; }
+  .lib-grid { padding: 16px; }
+  .lib-controls { padding: 12px 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    BRAND<span class="logo-fire">E</span>RIJ
+    <div class="logo-divider"></div>
+    <span class="logo-sub">CAMPAGNE STUDIO · 300</span>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('generator', this)">🔥 Generator</button>
+    <button class="nav-tab" onclick="switchTab('library', this)">📚 Bibliotheek</button>
+  </div>
+  <div class="opus-badge">
+    <div class="opus-dot"></div>
+    OPUS 4 POWERED
+  </div>
+</header>
+
+<!-- ════════════════════════════════════════
+     TAB: GENERATOR
+════════════════════════════════════════ -->
+<div id="tab-generator" class="tab-content active">
+  <div class="generator-layout">
+
+    <!-- SIDEBAR FORM -->
+    <aside class="sidebar">
+      <div class="sidebar-title">↳ CAMPAGNE INPUT</div>
+
+      <!-- BEDRIJFSNAAM -->
+      <div class="form-group">
+        <label class="form-label">Bedrijfsnaam *</label>
+        <input type="text" id="inp-brand" class="form-input" placeholder="bv. Duponzoo">
+      </div>
+
+      <!-- SECTOR met AI-lookup -->
+      <div class="form-group">
+        <div class="form-label-row">
+          <label class="form-label" style="margin-bottom:0">Sector / Niche</label>
+          <button class="btn-ai-lookup" onclick="aiLookup('sector')" title="AI zoekt sector op basis van bedrijfsnaam">✦ AI zoekt op</button>
+        </div>
+        <div class="ai-field-wrap">
+          <input type="text" id="inp-sector" class="form-input" placeholder="bv. Pet retail, Bouw, HR...">
+          <div class="ai-result" id="ai-result-sector"></div>
+        </div>
+      </div>
+
+      <!-- DOELGROEP met AI-lookup -->
+      <div class="form-group">
+        <div class="form-label-row">
+          <label class="form-label" style="margin-bottom:0">Doelgroep</label>
+          <button class="btn-ai-lookup" onclick="aiLookup('doelgroep')" title="AI bepaalt doelgroep op basis van sector + bedrijf">✦ AI zoekt op</button>
+        </div>
+        <div class="ai-field-wrap">
+          <input type="text" id="inp-target" class="form-input" placeholder="bv. Dierenliefhebbers 25-55 West-Vlaanderen">
+          <div class="ai-result" id="ai-result-doelgroep"></div>
+        </div>
+      </div>
+
+      <!-- KERNPROBLEEM — altijd zelf invullen -->
+      <div class="form-group">
+        <label class="form-label">Kernprobleem of pijnpunt *</label>
+        <div class="form-hint">Altijd zelf invullen — dit is de brandstof van de campagne</div>
+        <textarea id="inp-problem" class="form-textarea" placeholder="bv. Klanten kopen ook bij de grote ketens. Weinig loyaliteit. Geen community."></textarea>
+      </div>
+
+      <div class="form-divider"></div>
+
+      <!-- CAMPAGNE-DOEL -->
+      <div class="form-group">
+        <label class="form-label">Campagne-doel</label>
+        <select id="inp-goal" class="form-select">
+          <option value="">Selecteer doel...</option>
+          <option>Meer winkelbezoek / traffic</option>
+          <option>Loyaliteit en retentie</option>
+          <option>Nieuwe klanten aantrekken</option>
+          <option>Employer branding / recruitment</option>
+          <option>Brand awareness opbouwen</option>
+          <option>Community bouwen</option>
+          <option>Launch van product of dienst</option>
+          <option>Omzet in stille periode verhogen</option>
+        </select>
+      </div>
+
+      <!-- BUDGET — split of totaal -->
+      <div class="form-group">
+        <label class="form-label">Budget</label>
+        <div class="budget-toggle">
+          <button class="btog active" id="btog-split" onclick="setBudgetMode('split')">Setup + Maandelijks</button>
+          <button class="btog" id="btog-total" onclick="setBudgetMode('total')">Totaalbudget</button>
+        </div>
+
+        <!-- SPLIT MODE -->
+        <div id="budget-split">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;">
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--grey);letter-spacing:1px;margin-bottom:6px;">SETUP (eenmalig)</div>
+              <select id="inp-budget-setup" class="form-select" style="width:100%;font-size:12px;">
+                <option value="">Selecteer...</option>
+                <option>€1.000 – €2.500</option>
+                <option>€2.500 – €5.000</option>
+                <option>€5.000 – €10.000</option>
+                <option>€10.000 – €20.000</option>
+                <option>€20.000+</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--grey);letter-spacing:1px;margin-bottom:6px;">MAANDELIJKS</div>
+              <select id="inp-budget-monthly" class="form-select" style="width:100%;font-size:12px;">
+                <option value="">Selecteer...</option>
+                <option>€500 – €1.000</option>
+                <option>€1.000 – €2.000</option>
+                <option>€2.000 – €3.500</option>
+                <option>€3.500 – €5.000</option>
+                <option>€5.000+</option>
+              </select>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--grey);letter-spacing:1px;margin-bottom:6px;">LOOPTIJD</div>
+            <select id="inp-budget-months" class="form-select" style="font-size:12px;">
+              <option value="">Aantal maanden...</option>
+              <option value="1">1 maand (eenmalig)</option>
+              <option value="3">3 maanden</option>
+              <option value="6">6 maanden</option>
+              <option value="12">12 maanden</option>
+              <option value="ongoing">Doorlopend</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- TOTAAL MODE -->
+        <div id="budget-total" style="display:none;margin-top:10px;">
+          <select id="inp-budget-total" class="form-select">
+            <option value="">Totaalbudget...</option>
+            <option>Klein (€2.500 – €7.500)</option>
+            <option>Middel (€7.500 – €20.000)</option>
+            <option>Groot (€20.000 – €50.000)</option>
+            <option>Enterprise (€50.000+)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- KANALEN met "AI kiest zelf" optie -->
+      <div class="form-group">
+        <label class="form-label">Voorkeur kanalen</label>
+        <div class="chips" id="chips-kanaal">
+          <div class="chip chip-ai selected" id="chip-ai-kanaal" onclick="toggleAiChip(this, 'chips-kanaal')">✦ AI kiest zelf</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">Meta Ads</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">TikTok</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">LinkedIn</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">In-store</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">E-mail</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">WhatsApp</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">Video / YouTube</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">PR / Pers</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">OOH / Print</div>
+          <div class="chip" onclick="toggleManualChip(this, 'chips-kanaal')">Google Ads</div>
+        </div>
+      </div>
+
+      <!-- TRIGGERS -->
+      <div class="form-group">
+        <label class="form-label">Psychologische trigger (optioneel)</label>
+        <div class="chips" id="chips-trigger">
+          <div class="chip" onclick="toggleChip(this)">FOMO</div>
+          <div class="chip" onclick="toggleChip(this)">Identiteit</div>
+          <div class="chip" onclick="toggleChip(this)">Belonging</div>
+          <div class="chip" onclick="toggleChip(this)">Loss aversion</div>
+          <div class="chip" onclick="toggleChip(this)">Social proof</div>
+          <div class="chip" onclick="toggleChip(this)">Gamification</div>
+          <div class="chip" onclick="toggleChip(this)">Humor</div>
+          <div class="chip" onclick="toggleChip(this)">Waarden</div>
+          <div class="chip" onclick="toggleChip(this)">Verrassing</div>
+          <div class="chip" onclick="toggleChip(this)">Exclusiviteit</div>
+          <div class="chip" onclick="toggleChip(this)">Educatie</div>
+          <div class="chip" onclick="toggleChip(this)">Empowerment</div>
+        </div>
+      </div>
+
+      <!-- EXTRA CONTEXT -->
+      <div class="form-group">
+        <label class="form-label">Extra context (optioneel)</label>
+        <textarea id="inp-context" class="form-textarea" placeholder="bv. Heeft al 2 winkels. Wil community bouwen. Klanten zijn fanatieke dierenliefhebbers. Concurrentie = Maxi Zoo."></textarea>
+      </div>
+
+      <button class="btn-generate" id="btn-gen" onclick="generateCampaigns()">
+        🔥 GENEREER CAMPAGNES
+      </button>
+    </aside>
+
+    <!-- OUTPUT -->
+    <main class="output-area" id="output-area">
+
+      <!-- EMPTY STATE -->
+      <div class="empty-state" id="empty-state">
+        <div class="empty-flame">🔥</div>
+        <div class="empty-title">KLAAR OM TE STOKEN</div>
+        <div class="empty-sub">
+          Vul de input in en klik op Genereer.<br>
+          Claude Opus denkt 3 doordachte campagne-concepten uit<br>
+          op maat van jouw klant.
+        </div>
+      </div>
+
+      <!-- LOADING STATE -->
+      <div class="loading-state" id="loading-state">
+        <div class="loading-bars">
+          <div class="loading-bar"></div>
+          <div class="loading-bar"></div>
+          <div class="loading-bar"></div>
+          <div class="loading-bar"></div>
+          <div class="loading-bar"></div>
+        </div>
+        <div class="loading-text">OPUS DENKT NA...</div>
+        <div class="loading-sub">Even geduld — dit duurt 20-40 seconden</div>
+      </div>
+
+      <!-- RESULTS -->
+      <div id="results-area" style="display:none;">
+        <div class="results-header">
+          <div class="results-title">↳ CAMPAGNE CONCEPTEN</div>
+          <div class="results-meta" id="results-meta"></div>
+        </div>
+        <div class="concepts-grid" id="concepts-grid"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════
+     TAB: LIBRARY
+════════════════════════════════════════ -->
+<div id="tab-library" class="tab-content">
+  <div class="library-layout">
+    <div class="lib-controls">
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="lib-search" placeholder="Zoek op merk, concept, trigger..." oninput="renderLib()">
+      </div>
+      <select class="lib-select" id="lib-sector" onchange="renderLib()">
+        <option value="">Alle sectoren</option>
+        <optgroup label="── Retail & Consumer">
+          <option value="g-retail">Alle Retail</option>
+          <option value="Retail">Retail (algemeen)</option>
+          <option value="Retail / Pet">Pet retail</option>
+          <option value="Retail / Sport">Sport retail</option>
+          <option value="Retail / DIY">DIY / Brico</option>
+          <option value="Retail / Interieur">Interieur</option>
+          <option value="Retail / Outdoor">Outdoor</option>
+          <option value="Retail / E-com">E-commerce</option>
+        </optgroup>
+        <optgroup label="── Food & Beverage">
+          <option value="g-food">Alle Food & Bev</option>
+          <option value="Food & Beverage">Food & Beverage</option>
+          <option value="FMCG">FMCG (algemeen)</option>
+          <option value="FMCG / Beauty">Beauty / FMCG</option>
+          <option value="Horeca">Horeca</option>
+          <option value="Horeca / Fine dining">Fine dining</option>
+        </optgroup>
+        <optgroup label="── B2B & Industrie">
+          <option value="g-b2b">Alle B2B</option>
+          <option value="B2B / HR">HR & Recruitment</option>
+          <option value="B2B / Bouw">Bouw & Constructie</option>
+          <option value="B2B / Industrie">Industrie</option>
+          <option value="B2B / Tech">Tech B2B</option>
+          <option value="Consulting / B2B">Consulting</option>
+          <option value="Logistiek / B2B">Logistiek</option>
+        </optgroup>
+        <optgroup label="── Tech & SaaS">
+          <option value="g-saas">Alle Tech/SaaS</option>
+          <option value="SaaS / B2B">SaaS B2B</option>
+          <option value="SaaS">SaaS (algemeen)</option>
+          <option value="Tech">Tech (algemeen)</option>
+          <option value="Finance / Fintech">Fintech</option>
+        </optgroup>
+        <optgroup label="── Finance & Insurance">
+          <option value="g-finance">Alle Finance</option>
+          <option value="Finance">Finance (algemeen)</option>
+          <option value="Insurance">Verzekeringen</option>
+        </optgroup>
+        <optgroup label="── Sport & Events">
+          <option value="g-sport">Alle Sport/Events</option>
+          <option value="Sport">Sport (algemeen)</option>
+          <option value="Sport / Events">Sport Events</option>
+          <option value="Entertainment / Events">Entertainment</option>
+          <option value="Toerisme">Toerisme</option>
+          <option value="Hospitality">Hospitality</option>
+        </optgroup>
+        <optgroup label="── Mode & Lifestyle">
+          <option value="g-fashion">Alle Mode/Lifestyle</option>
+          <option value="Fashion">Fashion</option>
+          <option value="Luxe / Fashion">Luxe Fashion</option>
+          <option value="Automotive">Automotive</option>
+        </optgroup>
+        <optgroup label="── Media & Onderwijs">
+          <option value="g-media">Alle Media/Edu</option>
+          <option value="Media">Media (algemeen)</option>
+          <option value="Onderwijs">Onderwijs</option>
+          <option value="Edtech">Edtech</option>
+          <option value="Gaming">Gaming</option>
+        </optgroup>
+        <optgroup label="── NGO & Overheid">
+          <option value="g-ngo">Alle NGO/Overheid</option>
+          <option value="NGO">NGO (algemeen)</option>
+          <option value="Overheid / Milieu">Overheid / Milieu</option>
+          <option value="Overheid / Transport">Overheid / Transport</option>
+          <option value="NGO / Gezondheid">Gezondheid NGO</option>
+        </optgroup>
+        <optgroup label="── Gezondheid & Welzijn">
+          <option value="g-health">Alle Gezondheid</option>
+          <option value="Health / Tech">Health Tech</option>
+          <option value="Health / SaaS">Health SaaS</option>
+          <option value="Gezondheid / KMO">Gezondheid KMO</option>
+        </optgroup>
+      </select>
+
+      <select class="lib-select" id="lib-trigger" onchange="renderLib()">
+        <option value="">Alle triggers</option>
+        <optgroup label="── Identiteit & Ego">
+          <option value="g-identiteit">Alle Identiteit/Ego</option>
+          <option value="Identiteit">Identiteit</option>
+          <option value="Trots + Belonging">Trots</option>
+          <option value="Identiteit + Trots">Identiteit + Trots</option>
+          <option value="Empowerment">Empowerment</option>
+          <option value="Anti-establishment">Anti-establishment</option>
+        </optgroup>
+        <optgroup label="── Sociaal & Community">
+          <option value="g-sociaal">Alle Sociaal</option>
+          <option value="Belonging">Belonging</option>
+          <option value="Social proof">Social proof</option>
+          <option value="Co-creation">Co-creation</option>
+          <option value="Sociale norm">Sociale norm</option>
+        </optgroup>
+        <optgroup label="── Schaarste & Urgentie">
+          <option value="g-schaarste">Alle Schaarste/Urgentie</option>
+          <option value="FOMO">FOMO</option>
+          <option value="Loss aversion">Loss aversion</option>
+          <option value="Exclusiviteit">Exclusiviteit</option>
+          <option value="Schaarste">Schaarste</option>
+          <option value="Urgentie">Urgentie</option>
+        </optgroup>
+        <optgroup label="── Emotie & Verhaal">
+          <option value="g-emotie">Alle Emotie</option>
+          <option value="Emotie">Emotie</option>
+          <option value="Nostalgie">Nostalgie</option>
+          <option value="Humor">Humor</option>
+          <option value="Verrassing">Verrassing</option>
+          <option value="Warmte">Warmte</option>
+        </optgroup>
+        <optgroup label="── Waarden & Purpose">
+          <option value="g-waarden">Alle Waarden</option>
+          <option value="Waarden">Waarden (algemeen)</option>
+          <option value="Waarden + Purpose">Purpose</option>
+          <option value="Waarden + Identiteit">Waarden + Identiteit</option>
+          <option value="Duurzaamheid">Duurzaamheid</option>
+        </optgroup>
+        <optgroup label="── Rationeel & Bewijs">
+          <option value="g-rationeel">Alle Rationeel</option>
+          <option value="Vertrouwen">Vertrouwen</option>
+          <option value="Educatie">Educatie</option>
+          <option value="Herkomst">Herkomst</option>
+          <option value="Authority">Authority</option>
+          <option value="Bewijs">Bewijs</option>
+        </optgroup>
+        <optgroup label="── Gamification & Fun">
+          <option value="g-game">Alle Gamification</option>
+          <option value="Gamification">Gamification</option>
+          <option value="FOMO + Gamification">FOMO + Gamification</option>
+          <option value="Competitie">Competitie</option>
+        </optgroup>
+      </select>
+      <select class="lib-select" id="lib-feas" onchange="renderLib()">
+        <option value="">Alle haalbaarheid</option>
+        <option value="✅">✅ Direct</option>
+        <option value="🔶">🔶 Aanpassen</option>
+        <option value="❌">❌ Out of scope</option>
+      </select>
+      <button class="btn-reset" onclick="resetLib()">↺ Reset</button>
+    </div>
+
+    <div class="lib-stats">
+      <span class="lib-stat">Zichtbaar: <strong id="ls-visible">—</strong></span>
+      <span class="lib-stat">✅ Direct: <strong id="ls-yes" style="color:#6BAF6B">—</strong></span>
+      <span class="lib-stat">🔶 Aanpassen: <strong id="ls-adapt" style="color:#D4A843">—</strong></span>
+      <span class="lib-stat">❌ Out of scope: <strong id="ls-no" style="color:#AF6B6B">—</strong></span>
+    </div>
+
+    <div class="lib-grid" id="lib-grid"></div>
+
+    <div class="export-bar">
+      <button class="btn-export" onclick="exportCSV()">⬇ Export CSV</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// CAMPAIGN LIBRARY DATA — BATCH 1 (100)
+// ═══════════════════════════════════════════
+const LIBRARY = [
+  {n:1,brand:"Spotify",name:"Wrapped",sector:"Entertainment",kanaal:"App + Social",trigger:"Identiteit",format:"Data-personalisatie",mechanism:"Elke gebruiker krijgt een uniek jaaroverzicht van zijn luistergedrag, visueel verpakt en direct deelbaar. De campagne draait op ego en identiteitsbevestiging.",target:"B2C / Millennials",feasibility:"✅"},
+  {n:2,brand:"Nike",name:"Find Your Greatness",sector:"Sport",kanaal:"Video + OOH",trigger:"Identiteit",format:"Emotionele mini-doc",mechanism:"Niet de topsporter maar gewone mensen die hun persoonlijke greatness vinden. Democratisering van het begrip 'atleet'. Iedereen is de held.",target:"B2C breed",feasibility:"✅"},
+  {n:3,brand:"Dove",name:"Real Beauty",sector:"FMCG / Beauty",kanaal:"Video + Print",trigger:"Identiteit",format:"Emotionele mini-doc",mechanism:"Echte vrouwen i.p.v. modellen. Aanvecht de schoonheidsindustrie van binnenuit. Sociaal bewijs via maatschappelijke discussie.",target:"B2C / Vrouwen",feasibility:"✅"},
+  {n:4,brand:"Airbnb",name:"Belong Anywhere",sector:"Travel",kanaal:"Video + Social",trigger:"Belonging",format:"Storytelling",mechanism:"Niet de accommodatie verkopen maar het gevoel van thuiskomen overal ter wereld. Positionering op emotie, niet prijs.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:5,brand:"Coca-Cola",name:"Share a Coke",sector:"FMCG",kanaal:"Retail + Social",trigger:"Identiteit + Social proof",format:"Productpersonalisatie",mechanism:"Eigen naam op de fles. Van massaproduct naar persoonlijk cadeau. Trigger om foto te maken en te delen.",target:"B2C breed",feasibility:"🔶"},
+  {n:6,brand:"Apple",name:"Shot on iPhone",sector:"Tech",kanaal:"OOH + Social",trigger:"Identiteit + Trots",format:"UGC Challenge",mechanism:"Klanten worden de fotograaf en reclamemaker tegelijk. Het product is de held, de gebruiker ook. Geen acteurs.",target:"B2C / Creatieven",feasibility:"✅"},
+  {n:7,brand:"Bumble",name:"Find Them on Bumble",sector:"Tech / Dating",kanaal:"OOH + Video",trigger:"Identiteit + FOMO",format:"OOH storytelling",mechanism:"Echte succesvolle vrouwen uit NYC gevonden via de app. Bewijs dat de doelgroep ook op Bumble zit.",target:"B2C / 20-35",feasibility:"🔶"},
+  {n:8,brand:"LinkedIn",name:"In It Together",sector:"B2B / HR",kanaal:"Video + LinkedIn",trigger:"Belonging",format:"Emotionele mini-doc",mechanism:"Echte professionele groeiverhalen van gewone gebruikers. Community-gevoel in een zakelijk netwerk.",target:"B2B / Professionals",feasibility:"✅"},
+  {n:9,brand:"Patagonia",name:"Don't Buy This Jacket",sector:"Retail / Outdoor",kanaal:"Print + PR",trigger:"Identiteit + Waarden",format:"Anti-reclame",mechanism:"Oproep om niet te kopen op Black Friday in de NYT. Radicale eerlijkheid versterkt het merk én genereert enorme PR.",target:"B2C / 30-55",feasibility:"🔶"},
+  {n:10,brand:"IKEA",name:"Bookbook",sector:"Retail",kanaal:"Video + Viral",trigger:"Humor + Nostalgie",format:"Parody video",mechanism:"Catalogus gepresenteerd als Apple-product launch. Zelfspot van een groot merk. Viraliteit door herkenning.",target:"B2C breed",feasibility:"✅"},
+  {n:11,brand:"Starbucks",name:"Rewards Program",sector:"Food & Beverage",kanaal:"App + In-store",trigger:"Loss aversion + Belonging",format:"Community gamification",mechanism:"Sterren sparen voor gratis koffie. Tiers creëren aspiratie. App houdt de klant dagelijks betrokken.",target:"B2C breed",feasibility:"✅"},
+  {n:12,brand:"Duolingo",name:"Streak Challenge",sector:"Edtech",kanaal:"App + Push",trigger:"Loss aversion + FOMO",format:"Gamification",mechanism:"Je streak verliezen voelt slechter dan winnen. Push-notificaties vanuit de uil die 'dreigt'. Dagelijkse gewoonte via verliesangst.",target:"B2C breed",feasibility:"✅"},
+  {n:13,brand:"McDonald's",name:"Monopoly Game",sector:"Food & Beverage",kanaal:"In-store + App",trigger:"FOMO + Gamification",format:"Bordspel mechanic",mechanism:"Elke aankoop geeft een spelpotje. Zeldzame stukken creëren collector-gedrag. Enorme traffic driver naar de zaak.",target:"B2C breed",feasibility:"✅"},
+  {n:14,brand:"Nike",name:"NRC Running Club",sector:"Sport",kanaal:"App + Community",trigger:"Belonging + Identiteit",format:"Community gamification",mechanism:"App die loops bijhoudt, badges geeft en je vergelijkt met vrienden. Van product naar community platform.",target:"B2C / Actief",feasibility:"🔶"},
+  {n:15,brand:"Red Bull",name:"Flugtag",sector:"Energy drink",kanaal:"Live event + Video",trigger:"FOMO + Entertainment",format:"Participatief event",mechanism:"Mensen bouwen vliegtuigen en springen van een pier. Spectacle genereert UGC en media-aandacht gratis.",target:"B2C / 18-30",feasibility:"🔶"},
+  {n:16,brand:"Lay's",name:"Do Us a Flavor",sector:"FMCG",kanaal:"Social + Retail",trigger:"Identiteit + Co-creation",format:"Contest / crowdsourcing",mechanism:"Consument mag de nieuwe smaak uitvinden. Winnende smaak komt echt in de winkel. Massa-participatie via voting.",target:"B2C breed",feasibility:"✅"},
+  {n:17,brand:"LEGO",name:"LEGO Ideas",sector:"Toy / Retail",kanaal:"Online platform",trigger:"Identiteit + Co-creation",format:"Community platform",mechanism:"Fans pitchen hun eigen LEGO-sets. Bij 10.000 stemmen wordt het product écht gemaakt.",target:"B2C / Families",feasibility:"🔶"},
+  {n:18,brand:"Heineken",name:"The Candidate",sector:"FMCG / HR",kanaal:"Video + Viral",trigger:"Entertainment + Humor",format:"Hidden camera / reality",mechanism:"Sollicitanten worden getest op sociale vaardigheden buiten het CV. Viraal interview-format dat waarden toont.",target:"B2B / HR + B2C",feasibility:"✅"},
+  {n:19,brand:"Airbnb",name:"Night At",sector:"Travel",kanaal:"PR + Social",trigger:"FOMO + Exclusiviteit",format:"PR stunt / contest",mechanism:"Win een nacht in iconische locaties: museum, ijsberg, Eiffeltoren. Nieuwswaardige PR zonder grote media spend.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:20,brand:"Pokémon GO",name:"Launch Campaign",sector:"Gaming",kanaal:"AR + Social",trigger:"FOMO + Nostalgie + Community",format:"Augmented Reality",mechanism:"Nostalgie van Pokémon + fysieke wereld + community. Mensen buiten brengen voor een game. Viral loop via social.",target:"B2C / 20-35",feasibility:"❌"},
+  {n:21,brand:"GoPro",name:"Be a Hero",sector:"Tech / Sport",kanaal:"YouTube + Social",trigger:"Identiteit + Social proof",format:"UGC platform",mechanism:"Klanten leveren alle content. Elke GoPro-video is reclame. Het product verkoopt zichzelf via de beelden die het maakt.",target:"B2C / Avonturiers",feasibility:"✅"},
+  {n:22,brand:"Airbnb",name:"Live Anywhere",sector:"Travel",kanaal:"Social + PR",trigger:"FOMO + Identiteit",format:"Influencer / Lifestyle",mechanism:"Mensen werken een maand op een andere locatie via Airbnb. Remote work lifestyle als campagne-kapstok.",target:"B2C / 28-45",feasibility:"✅"},
+  {n:23,brand:"TikTok",name:"#InMyDenim",sector:"Platform / Fashion",kanaal:"TikTok",trigger:"Belonging + FOMO",format:"Hashtag challenge",mechanism:"Fashion merk lanceert hashtag-challenge. Gebruikers recreëren het format. Viraliteit via platform-algoritme.",target:"B2C / Gen-Z",feasibility:"✅"},
+  {n:24,brand:"Glossier",name:"Into The Gloss",sector:"Beauty",kanaal:"Blog + Social",trigger:"Social proof + Belonging",format:"Community content",mechanism:"Beauty blog als basis voor het merk. Klanten werden ambassadeurs vóór de lancering. Community first, product second.",target:"B2C / Vrouwen",feasibility:"✅"},
+  {n:25,brand:"Lululemon",name:"Ambassador Program",sector:"Sport / Retail",kanaal:"Local + Social",trigger:"Belonging + Social proof",format:"Lokale ambassadeurs",mechanism:"Lokale yoga-instructeurs als merkverspreiders. Authenticiteit via echte gebruikers, niet celebrities. Schaalbaar model.",target:"B2C / 28-45",feasibility:"✅"},
+  {n:26,brand:"Warby Parker",name:"Home Try-On",sector:"Retail / Optiek",kanaal:"E-commerce + Social",trigger:"Risk removal + Social proof",format:"Product trial",mechanism:"5 brillen thuis proberen gratis. Klant deelt foto's voor feedback van vrienden. Sociale validatie als sales-tool.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:27,brand:"Tripadvisor",name:"Reviews Engine",sector:"Travel / Platform",kanaal:"Web + Email",trigger:"Social proof",format:"Review platform",mechanism:"De review IS de campagne. Elke tevreden gast genereert nieuwe verkoop. Gebruikers als de echte verkopers.",target:"B2C breed",feasibility:"✅"},
+  {n:28,brand:"Gymshark",name:"66 Days Challenge",sector:"Sport / Retail",kanaal:"Instagram + TikTok",trigger:"Identiteit + Belonging",format:"Community challenge",mechanism:"66 dagen gewoonte opbouwen met Gymshark-community. Progress posts genereren organisch bereik en social proof.",target:"B2C / Fitness",feasibility:"✅"},
+  {n:29,brand:"Dollar Shave Club",name:"Our Blades Are F***ing Great",sector:"E-commerce / FMCG",kanaal:"YouTube + Viral",trigger:"Humor + Anti-establishment",format:"Viral video",mechanism:"Oprichter in laagbudget video met scherpe humor aanvalt Gillette. $4.750 productie, $12M omzet in jaar 1.",target:"B2C / Mannen",feasibility:"✅"},
+  {n:30,brand:"Dropbox",name:"Refer a Friend",sector:"Tech / SaaS",kanaal:"Email + Product",trigger:"Social proof + Incentive",format:"Referral program",mechanism:"Meer opslagruimte voor elke uitnodiging. Viraal groeimechanisme ingebakken in het product zelf.",target:"B2B / B2C",feasibility:"🔶"},
+  {n:31,brand:"John Lewis",name:"The Bear and the Hare",sector:"Retail",kanaal:"TV + Online",trigger:"Nostalgie + Emotie",format:"Emotionele mini-film",mechanism:"Jaarlijkse Kerstfilm die tranen oproept. Merk = warmte en emotie. Geen product zichtbaar, toch record sales.",target:"B2C breed",feasibility:"✅"},
+  {n:32,brand:"P&G",name:"Thank You Mom",sector:"FMCG",kanaal:"Video + TV",trigger:"Emotie + Belonging",format:"Emotionele mini-doc",mechanism:"Olympische atleten en hun moeders. Emotie van opoffering en steun. Universeel verhaal dat iedereen raakt.",target:"B2C / Gezinnen",feasibility:"✅"},
+  {n:33,brand:"Always",name:"#LikeAGirl",sector:"FMCG",kanaal:"Video + Social",trigger:"Identiteit + Empowerment",format:"Sociaal experiment video",mechanism:"Kinderen vs. volwassenen: wat doet 'als een meisje' met je? Breekt een stigma en positioneert het merk als bondgenoot.",target:"B2C / Vrouwen",feasibility:"✅"},
+  {n:34,brand:"Budweiser",name:"Puppy Love",sector:"FMCG",kanaal:"TV + Social",trigger:"Emotie + Nostalgie",format:"Super Bowl film",mechanism:"Hond en Clydesdale paard als beste vrienden. Geen product, enkel gevoel. Meest gedeelde Super Bowl ad jaren.",target:"B2C breed",feasibility:"🔶"},
+  {n:35,brand:"Volvo Trucks",name:"Epic Split (Van Damme)",sector:"B2B / Auto",kanaal:"YouTube + Viral",trigger:"Wow-factor + Humor",format:"Demonstration video",mechanism:"Jean-Claude Van Damme doet spagaat tussen twee Volvo-trucks. Techniek bewijzen via spektakel. B2B viraal.",target:"B2B / Transport",feasibility:"🔶"},
+  {n:36,brand:"Heineken",name:"Worlds Apart",sector:"FMCG",kanaal:"Video + Social",trigger:"Empathy + Belonging",format:"Sociaal experiment",mechanism:"Mensen met tegengestelde meningen bouwen samen meubels. Bier als brug tussen mensen.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:37,brand:"Google",name:"Parisian Love",sector:"Tech",kanaal:"Video + TV",trigger:"Emotie + Nostalgie",format:"Product demo als film",mechanism:"Een liefdesverhaal verteld puur via Google-zoekopdrachten. Toont het product zonder het te tonen.",target:"B2C breed",feasibility:"✅"},
+  {n:38,brand:"Thai Life Insurance",name:"Unsung Hero",sector:"Finance / Insurance",kanaal:"Video + Viral",trigger:"Emotie + Karma",format:"Emotionele mini-doc",mechanism:"Man helpt dagelijks vreemden. Na 30 dagen zie je de impact. Universeel verhaal met merk op het einde.",target:"B2C / 30-55",feasibility:"✅"},
+  {n:39,brand:"Extra Gum",name:"Sarah & Juan",sector:"FMCG",kanaal:"Video + Social",trigger:"Nostalgie + Romantiek",format:"Animatie / short film",mechanism:"Heel een liefdesverhaal via kauwgompapiertjes. 70M views. Product = bewijs van aandacht.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:40,brand:"WestJet",name:"Christmas Miracle",sector:"Travel",kanaal:"Video + Viral",trigger:"Verrassing + Warmte",format:"Surprise & delight",mechanism:"Kerstcadeaus voor passagiers bij aankomst die ze op vertrek besteld hadden. 50M views.",target:"B2C breed",feasibility:"🔶"},
+  {n:41,brand:"Old Spice",name:"The Man Your Man Could Smell Like",sector:"FMCG",kanaal:"TV + YouTube",trigger:"Humor + Identiteit",format:"Absurdistische video",mechanism:"Bizarre snelle montage, directe aanspraak aan vrouwen. Herpositionering van oubollig merk. 55M views.",target:"B2C / Vrouwen (kopers)",feasibility:"✅"},
+  {n:42,brand:"Wendy's",name:"Twitter Roasting",sector:"Food & Beverage",kanaal:"Twitter/X",trigger:"Humor + Anti-establishment",format:"Social media personality",mechanism:"Wendy's roast McDonald's en concurrenten publiekelijk. Fans verwachten het en delen screenshots. Permanent viral.",target:"B2C / 18-35",feasibility:"✅"},
+  {n:43,brand:"Burger King",name:"Moldy Whopper",sector:"Food & Beverage",kanaal:"Video + Print",trigger:"Vertrouwen + Provocatie",format:"Anti-reclame",mechanism:"Beeldschone foto's van een rottende burger in 34 dagen. Boodschap: geen kunstmatige bewaarmiddelen. Schokkend + eerlijk.",target:"B2C breed",feasibility:"🔶"},
+  {n:44,brand:"Aldi",name:"Kevin the Carrot",sector:"Retail",kanaal:"TV + Social",trigger:"Nostalgie + Humor",format:"Animatie / Karakter",mechanism:"Kerst-mascotte die jaarlijks terugkeert. Klanten verzamelen fysieke poppen. Fan-community rond een wortel.",target:"B2C / Gezinnen",feasibility:"✅"},
+  {n:45,brand:"Ryanair",name:"Cheap Flights Copy",sector:"Travel",kanaal:"Social + OOH",trigger:"Humor + Prijs",format:"Zelfspot reclame",mechanism:"Ryanair maakt zichzelf de grap. Radicale eerlijkheid over slechte service. En toch vlieg je mee.",target:"B2C breed",feasibility:"✅"},
+  {n:46,brand:"Oatly",name:"It's Like Milk But Made For Humans",sector:"FMCG",kanaal:"Packaging + OOH",trigger:"Humor + Waarden",format:"Copy-gedreven campagne",mechanism:"Scherpe, grappige teksten op de verpakking zelf. Packaging als media-kanaal. Merk met een mening.",target:"B2C / 25-40",feasibility:"✅"},
+  {n:47,brand:"Cards Against Humanity",name:"Black Friday Hole",sector:"Games / Retail",kanaal:"PR + Social",trigger:"Humor + Curiositeit",format:"PR-stunt",mechanism:"Op Black Friday groeven ze een nutteloze gat in de grond en vroegen geld. $100k opgehaald. Pure cultuur-kritiek.",target:"B2C / 25-40",feasibility:"🔶"},
+  {n:48,brand:"Deadpool",name:"Marketing Campaign",sector:"Entertainment",kanaal:"Social + OOH + TV",trigger:"Humor + Meta-humor",format:"360° character marketing",mechanism:"Deadpool blijft in character buiten de film. Reageert op echte events. Geen traditionele promo.",target:"B2C / 18-35",feasibility:"🔶"},
+  {n:49,brand:"MoneySuperMarket",name:"EpicStrut",sector:"Finance",kanaal:"TV + Social",trigger:"Humor + Entertainment",format:"Absurdistische video",mechanism:"Ordinaire man straalt zelfvertrouwen uit na een goede deal. Absurd maar herkenbaar. Finance als fun.",target:"B2C breed",feasibility:"✅"},
+  {n:50,brand:"Paddy Power",name:"Save Our Shirt",sector:"Gambling",kanaal:"PR + Social",trigger:"Provocatie + PR",format:"PR-stunt",mechanism:"Sponsoring op shirt VERBERGEN i.p.v. tonen. Genereerde 10x meer aandacht. Anti-sponsor als sponsor.",target:"B2C / Mannen",feasibility:"🔶"},
+  {n:51,brand:"Netflix",name:"House of Cards Data",sector:"Entertainment",kanaal:"Data-driven",trigger:"Personalisatie",format:"Data-gedreven productie",mechanism:"Netflix analyseerde kijkdata voor de beslissing House of Cards te maken. Data vervangt creatie-intuïtie.",target:"B2C breed",feasibility:"🔶"},
+  {n:52,brand:"Amazon",name:"Prime Day",sector:"E-commerce",kanaal:"Email + App + Ads",trigger:"Loss aversion + FOMO",format:"Flash sale event",mechanism:"Één dag het gevoel van Black Friday. Countdown-timer, limited deals. Urgentie als campagne-mechanic.",target:"B2C breed",feasibility:"✅"},
+  {n:53,brand:"Uber",name:"UberPOOL Launch",sector:"Tech",kanaal:"App + Referral",trigger:"Social proof + Kostenbesparing",format:"Referral + Product demo",mechanism:"Deel een rit, betaal minder. Viraliteit via het product zelf. Groei via netwerk-effecten.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:54,brand:"Mailchimp",name:"Did You Mean Mailchimp?",sector:"SaaS / B2B",kanaal:"Podcast + Online",trigger:"Curiositeit + Humor",format:"Content marketing",mechanism:"Serie van nep-bedrijven met namen die klinken als Mailchimp. Indirect merk versterken via absurdisme.",target:"B2B / Marketeers",feasibility:"✅"},
+  {n:55,brand:"Grammarly",name:"Productiviteitscampagne",sector:"SaaS",kanaal:"YouTube + Social",trigger:"Angst + Loss aversion",format:"Scenario video's",mechanism:"Mini-scenario's tonen kostbare fouten door slechte schrijfvaardigheid. Angst als trigger, oplossing direct beschikbaar.",target:"B2B / Professionals",feasibility:"✅"},
+  {n:56,brand:"Slack",name:"So Yeah, We Tried Slack",sector:"SaaS / B2B",kanaal:"Full-page advertentie",trigger:"Social proof + Identiteit",format:"Openbrief / advertentie",mechanism:"Open brief in NYT als B2B-merk. Directe aanspraak aan de markt over switching van email naar chat.",target:"B2B / Teams",feasibility:"🔶"},
+  {n:57,brand:"HubSpot",name:"Inbound Marketing",sector:"SaaS / B2B",kanaal:"Blog + SEO + Event",trigger:"Educatie + Trust",format:"Content marketing ecosysteem",mechanism:"Gratis kennis en tools bouwen vertrouwen en leads. Inbound als filosofie én als campagnestrategie.",target:"B2B / Marketing teams",feasibility:"✅"},
+  {n:58,brand:"Intercom",name:"Jobs to be Done Series",sector:"SaaS / B2B",kanaal:"Podcast + Blog",trigger:"Educatie + Trust",format:"Thought leadership",mechanism:"Diepgaande content over klantsucces en product-strategie. Gratis kennis die premium klanten aantrekt.",target:"B2B / Product teams",feasibility:"✅"},
+  {n:59,brand:"Canva",name:"Design Challenge",sector:"SaaS",kanaal:"Email + Social",trigger:"Identiteit + Gamification",format:"Community challenge",mechanism:"Wekelijkse design-uitdagingen voor gebruikers. UGC genereert content, retentie groeit.",target:"B2C / Creatieven",feasibility:"✅"},
+  {n:60,brand:"Notion",name:"Template Gallery",sector:"SaaS",kanaal:"Product + Community",trigger:"Social proof + Identiteit",format:"Community platform",mechanism:"Gebruikers maken templates die anderen downloaden. Productiviteit-identiteit als campagne.",target:"B2B / B2C",feasibility:"🔶"},
+  {n:61,brand:"Coolblue",name:"Alles voor een glimlach",sector:"Retail / E-com",kanaal:"TV + Social + CS",trigger:"Humor + Service",format:"Klantervaring als campagne",mechanism:"Leveranciers die zingen, verpakkingen met grappen. Klantervaring IS de marketing.",target:"B2C breed",feasibility:"✅"},
+  {n:62,brand:"De Lijn",name:"Op De Lijn Campagne",sector:"Overheid / Transport",kanaal:"OOH + Social",trigger:"Belonging + Maatschappij",format:"Social awareness",mechanism:"Gedragsverandering via positieve framing van openbaar vervoer. Trots en gemeenschapsgevoel als trigger.",target:"B2C breed",feasibility:"✅"},
+  {n:63,brand:"Torfs",name:"Blij Werken / Employer Brand",sector:"Retail / HR",kanaal:"Video + PR",trigger:"Identiteit + Belonging",format:"Employer branding",mechanism:"Intern geluk als extern merk. Beste werkgever = beste klantervaring. Medewerkers als ambassadeurs.",target:"B2C + B2B HR",feasibility:"✅"},
+  {n:64,brand:"Colruyt",name:"Laagste Prijs Guarantee",sector:"Retail",kanaal:"Print + TV + Folder",trigger:"Loss aversion + Vertrouwen",format:"Price guarantee",mechanism:"Prijs aanpassen als ergens goedkoper. Simpele belofte die loyaliteit creëert. Consistentie als campagnewapen.",target:"B2C breed",feasibility:"🔶"},
+  {n:65,brand:"Bpost",name:"Kerstcampagne",sector:"Logistiek",kanaal:"Video + Retail",trigger:"Nostalgie + Warmte",format:"Emotionele film",mechanism:"De postbode als held van Kerst. Emotionele band met een overheidsservice. Personificatie van een dienst.",target:"B2C breed",feasibility:"✅"},
+  {n:66,brand:"Ici Paris XL",name:"Parfum Discover Day",sector:"Retail / Beauty",kanaal:"In-store + Social",trigger:"Exclusiviteit + Ervaring",format:"Event marketing",mechanism:"In-store belevenisdagen met parfum-experts. Ervaring verkoopt beter dan online.",target:"B2C / Vrouwen",feasibility:"✅"},
+  {n:67,brand:"Dovy Keukens",name:"Showroom Weekends",sector:"Retail / Interieur",kanaal:"Radio + Local ads",trigger:"Loss aversion + Gezin",format:"Lokaal event",mechanism:"Tijdelijk aanbod gekoppeld aan showroom-bezoek. Radio als bereik, showroom als conversie-machine.",target:"B2C / 35-55",feasibility:"✅"},
+  {n:68,brand:"Hubo",name:"Doe het zelf... of toch niet",sector:"Retail / DIY",kanaal:"TV + Social",trigger:"Humor + Herkenning",format:"Zelfspot campagne",mechanism:"Mensen die zelf klusjes verpesten. Humor die herkend wordt. Hubo = redding. Sterke emotionele positioning.",target:"B2C / Mannen",feasibility:"✅"},
+  {n:69,brand:"Lidl",name:"Surprise bag Campagne",sector:"Retail",kanaal:"App + Social",trigger:"FOMO + Gamification",format:"Limited drop mechanic",mechanism:"Resterende producten als verrassingspakket in de app. Schaarste + duurzaamheid + prijs.",target:"B2C breed",feasibility:"✅"},
+  {n:70,brand:"Too Good To Go",name:"Activist Brand",sector:"Food / Retail",kanaal:"Social + PR + B2B",trigger:"Waarden + Belonging",format:"Activist brand",mechanism:"Voedselverspilling aanvechten via app. Merk = beweging. Klanten voelen zich held bij elke aankoop.",target:"B2C / 20-40",feasibility:"✅"},
+  {n:71,brand:"Daniel Wellington",name:"Micro-influencer Army",sector:"Fashion / Watch",kanaal:"Instagram",trigger:"Social proof + Exclusiviteit",format:"Influencer netwerk",mechanism:"Honderden micro-influencers met unieke kortingscode. Schaal via massa, niet via één dure celebrity.",target:"B2C / 20-35",feasibility:"✅"},
+  {n:72,brand:"Fenty Beauty",name:"Inclusivity Launch",sector:"Beauty",kanaal:"Social + PR",trigger:"Identiteit + Belonging",format:"Product launch / Diversiteit",mechanism:"40 foundation-tinten bij lancering. Statement tegen industrie. Inclusiviteit als campagne én als product.",target:"B2C / Vrouwen",feasibility:"🔶"},
+  {n:73,brand:"Gymshark",name:"Blackout Tuesday",sector:"Sport / Retail",kanaal:"Social + PR",trigger:"Waarden + Identiteit",format:"Merkstandpunt",mechanism:"Website neergehaald op Black Friday. Boodschap: take care of yourself first. Tegengesteld aan prijs-push.",target:"B2C / Fitness",feasibility:"🔶"},
+  {n:74,brand:"Chipotle",name:"TikTok Lid Flip Challenge",sector:"Food & Beverage",kanaal:"TikTok",trigger:"FOMO + Gamification",format:"TikTok challenge",mechanism:"Simpele fysieke actie met een Chipotle-doos. 111M views in 6 dagen. Product als prop in virale challenge.",target:"B2C / 16-30",feasibility:"✅"},
+  {n:75,brand:"Ocean Spray",name:"Cranberry TikTok",sector:"FMCG",kanaal:"TikTok",trigger:"Authenticiteit + Verrassing",format:"Organische viral hit",mechanism:"Willekeurige man skateboard met Ocean Spray. Bedrijf geeft hem een truck. Organisch moment tot campagne gemaakt.",target:"B2C breed",feasibility:"✅"},
+  {n:76,brand:"e.l.f. Cosmetics",name:"Eyes Lips Face Song",sector:"Beauty",kanaal:"TikTok",trigger:"Belonging + Muziek",format:"Branded audio / Challenge",mechanism:"Eigen TikTok-liedje laten maken. Eerste originele muziek voor TikTok-campagne. 5M+ video's.",target:"B2C / Gen-Z",feasibility:"✅"},
+  {n:77,brand:"Prime (KSI & Logan)",name:"Influencer Brand Launch",sector:"FMCG",kanaal:"YouTube + Social + Retail",trigger:"Identiteit + FOMO",format:"Creator-led brand",mechanism:"Influencers als mede-eigenaars. Fan-base wordt klantenbasis. Distributie via supermarkten na hype online.",target:"B2C / 12-25",feasibility:"❌"},
+  {n:78,brand:"Crocs",name:"Unexpected Collabs",sector:"Fashion",kanaal:"Social + PR",trigger:"Curiositeit + Identiteit",format:"Collab drops",mechanism:"Post Malone, Balenciaga, KFC: absurde samenwerkingen maken van een 'lelijk' schoen een status-item.",target:"B2C / 18-35",feasibility:"🔶"},
+  {n:79,brand:"ALDI Australia",name:"Like Brands Campaign",sector:"Retail",kanaal:"TV + Social",trigger:"Humor + Prijs",format:"Vergelijkingsreclame",mechanism:"Openlijk premium merken vergelijken met ALDI-equivalenten. Parodie-verpakkingen als statement.",target:"B2C breed",feasibility:"🔶"},
+  {n:80,brand:"Nando's",name:"Last Whole Chicken",sector:"Food & Beverage",kanaal:"Social + PR",trigger:"Schaarste + Humor",format:"Schaarste stunt",mechanism:"Tijdens COVID: één kip te winnen via social. Simpele actie, enorme PR. Loyaliteit versterkt via schaarste.",target:"B2C / 20-35",feasibility:"✅"},
+  {n:81,brand:"Salesforce",name:"Trailblazer Community",sector:"SaaS / B2B",kanaal:"Platform + Events",trigger:"Belonging + Identiteit",format:"Community platform",mechanism:"Klanten worden 'Trailblazers'. Certificaten, ranglijsten, events. Identiteit gekoppeld aan product.",target:"B2B / Enterprise",feasibility:"🔶"},
+  {n:82,brand:"IBM",name:"Smarter Planet",sector:"B2B / Tech",kanaal:"Print + Online",trigger:"Waarden + Educatie",format:"Thought leadership",mechanism:"IBM positioneert zich als probleemoplosser voor mondiale uitdagingen. B2B merk met publiek manifest.",target:"B2B / Enterprise",feasibility:"🔶"},
+  {n:83,brand:"Deloitte",name:"Future of Work Series",sector:"Consulting / B2B",kanaal:"LinkedIn + Events",trigger:"Educatie + Authority",format:"Content marketing",mechanism:"Gratis rapporten en webinars over HR-trends. Expertise als magneet voor C-level beslissers.",target:"B2B / HR + CFO",feasibility:"✅"},
+  {n:84,brand:"Volvo",name:"Swedish Moments",sector:"Auto",kanaal:"Video + Print",trigger:"Identiteit + Veiligheid",format:"Storytelling",mechanism:"Veiligheid als kern-DNA van het merk via emotionele verhalen. Niet de auto, maar wat je beschermt.",target:"B2C + B2B fleet",feasibility:"✅"},
+  {n:85,brand:"Buurtzorg",name:"Self-Organizing Teams",sector:"Zorg / HR",kanaal:"PR + Word of mouth",trigger:"Waarden + Autonomie",format:"Employer branding via model",mechanism:"Zorgmodel als campagne. Media-aandacht zonder budget via maatschappelijk debat.",target:"B2B HR + B2C",feasibility:"🔶"},
+  {n:86,brand:"Coolblue",name:"Werkgeluk Campagne",sector:"Retail / HR",kanaal:"LinkedIn + Video",trigger:"Belonging + Identiteit",format:"Employer branding",mechanism:"Medewerkersverhalen als recruitment-campagne. Eerlijk, direct, grappig. Mensen willen er écht werken.",target:"B2B / HR + B2C",feasibility:"✅"},
+  {n:87,brand:"Tony's Chocolonely",name:"Slave Free Chocolate",sector:"FMCG",kanaal:"Packaging + PR + Social",trigger:"Waarden + Schuldgevoel",format:"Activist brand",mechanism:"De chocolade-industrie aanvechten van binnenuit. Repen met ongelijke stukken als metafoor voor ongelijkheid.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:88,brand:"Patagonia",name:"1% For the Planet",sector:"Outdoor / Retail",kanaal:"PR + Packaging",trigger:"Waarden + Identiteit",format:"Maatschappelijk engagement",mechanism:"1% van omzet naar milieu. Niet als PR-stunt, maar als structureel model. Merk = standpunt.",target:"B2C / 30-50",feasibility:"🔶"},
+  {n:89,brand:"Basecamp",name:"It Doesn't Have to Be Crazy at Work",sector:"SaaS / B2B",kanaal:"Boek + Social",trigger:"Anti-establishment + Waarden",format:"Thought leadership boek",mechanism:"Oprichters schrijven boek tégen startup-cultuur. Positionering als tegengewicht. Awareness zonder ads.",target:"B2B / KMO's",feasibility:"✅"},
+  {n:90,brand:"Morning Brew",name:"Referral Growth",sector:"Media / Newsletter",kanaal:"Email + Referral",trigger:"Social proof + Incentive",format:"Referral program",mechanism:"Grappige merchandise als beloning voor doorverwijzingen. Community-gevoel in een nieuwsbrief.",target:"B2C / 25-40",feasibility:"✅"},
+  {n:91,brand:"Duponzoo",name:"Duponzopoly",sector:"Retail / Pet",kanaal:"In-store + Meta + Community",trigger:"Gamification + Identiteit",format:"Bordspel mechanic",mechanism:"Klanten als speelbord. 50 echte klanten op een Monopoly-variant. Loopt over 5 activatiedagen. Engagement via punten en community.",target:"B2C / Dierenliefhebbers",feasibility:"✅"},
+  {n:92,brand:"Lidl Vlaanderen",name:"Lidl Plus Loyalty App",sector:"Retail",kanaal:"App + In-store",trigger:"Loss aversion + Gamification",format:"Loyalty app",mechanism:"Digitale bonnen, scratchcards, persoonlijke kortingen. App als loyaliteitsplatform voor dagelijkse shoppers.",target:"B2C breed",feasibility:"✅"},
+  {n:93,brand:"Ter Beke",name:"Verse Waren Campagne",sector:"Food / FMCG",kanaal:"TV + Retail",trigger:"Herkomst + Vertrouwen",format:"Herkomst storytelling",mechanism:"Boer tot bord verhaal. Vlaamse roots en ambacht als differentiator in supermarkt-schap.",target:"B2C breed",feasibility:"✅"},
+  {n:94,brand:"Katoen Natie",name:"Port Employer Brand",sector:"Logistiek / B2B",kanaal:"LinkedIn + Video",trigger:"Trots + Belonging",format:"Employer branding",mechanism:"Havenbedrijf maakt visueel spectaculaire employer branding video's. Trots op complexe operaties.",target:"B2B / HR",feasibility:"✅"},
+  {n:95,brand:"Resto Van Harte",name:"Anti-Food Waste",sector:"Food / Social",kanaal:"Social + PR",trigger:"Waarden + Belonging",format:"Activist brand",mechanism:"Overschot van supermarkten wordt restaurantmaaltijd. Merk = doel. Pers en social volgen vanzelf.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:96,brand:"Kinepolis",name:"Blockbuster Events",sector:"Entertainment",kanaal:"Social + Email + In-store",trigger:"FOMO + Nostalgie",format:"Event marketing",mechanism:"Speciale vertoningen, premieres, marathons. Van bioscoop naar belevenislocatie. Hogere ticketprijs gerechtvaardigd.",target:"B2C breed",feasibility:"✅"},
+  {n:97,brand:"Decathlon",name:"Sport For All",sector:"Retail / Sport",kanaal:"OOH + Social + Video",trigger:"Inclusiviteit + Prijs",format:"Democratisering campagne",mechanism:"Sport toegankelijk maken voor iedereen. Niet de elite, maar de beginner als held. Breed bereik via inclusiviteit.",target:"B2C breed",feasibility:"✅"},
+  {n:98,brand:"Club Brugge",name:"Fan Token / Community",sector:"Sport / Entertainment",kanaal:"App + Social + Stadium",trigger:"Belonging + Identiteit",format:"Community gamification",mechanism:"Supporters als medebeslissers via token-systeem. Eigenaarschap van het merk verdiept loyaliteit.",target:"B2C / Supporters",feasibility:"🔶"},
+  {n:99,brand:"Ghent Festivities",name:"Gentse Feesten App",sector:"Overheid / Events",kanaal:"App + Local media",trigger:"Belonging + FOMO",format:"Event app met gamification",mechanism:"Festivalprogramma + stempelkaart + lokale deals. Lokale trots + praktisch nut in één platform.",target:"B2C / Lokaal",feasibility:"🔶"},
+  {n:100,brand:"De Warmste Week",name:"Solidariteitscampagne",sector:"Media / NGO",kanaal:"Radio + TV + Social",trigger:"Belonging + Emotie + Empathy",format:"Community fundraising",mechanism:"Radio omroep als campagne-motor. Community voelt deel van iets groots. Elk goed doel een eigen verhaal.",target:"B2C breed",feasibility:"✅"},
+
+  // ═══════════════════════════════════════════
+  // BATCH 2 — CAMPAGNES 101-200
+  // Focus: Automotive, Bouw/Industrie, Finance, Horeca, Gezondheid,
+  // Mode, Sport, Onderwijs, HR/Recruitment, International deep-cuts
+  // ═══════════════════════════════════════════
+
+  // 101-110: AUTOMOTIVE & MOBILITEIT
+  {n:101,brand:"Volkswagen",name:"Think Small",sector:"Automotive",kanaal:"Print + OOH",trigger:"Anti-establishment + Humor",format:"Copy-gedreven print",mechanism:"In de jaren '60 promootte VW de kleine Kever in een wereld van grote Amerikaanse auto's. 'Think Small' brak alle reclameregels: veel wit, eerlijkheid over beperkingen. Resultaat: de meest gekopieerde advertentie in geschiedenis.",target:"B2C breed",feasibility:"🔶"},
+  {n:102,brand:"BMW",name:"The Hire (short films)",sector:"Automotive",kanaal:"Online video",trigger:"Identiteit + Entertainment",format:"Branded content / Mini-film",mechanism:"BMW produceerde 8 korte films met A-list regisseurs en acteurs, puur als entertainment. Auto als bijrol, gevoel als hoofdrol. Eerste grote branded content campagne online. 100M views vóór YouTube bestond.",target:"B2C / 35-55",feasibility:"🔶"},
+  {n:103,brand:"Tesla",name:"Zero Ad Spend",sector:"Automotive",kanaal:"PR + Word of mouth",trigger:"Exclusiviteit + Curiositeit",format:"Anti-reclame / PR",mechanism:"Tesla geeft nul euro uit aan traditionele reclame. Elon Musk's tweets, product-launches als events en mond-aan-mond zijn de enige kanalen. Schaarste en mysteriegevoel zijn het reclamemiddel.",target:"B2C / 30-55",feasibility:"🔶"},
+  {n:104,brand:"Renault",name:"Ev'rybody's Talking About EVs",sector:"Automotive",kanaal:"Video + Social",trigger:"Humor + Timing",format:"Culturele hijacking",mechanism:"Renault kapte in op de EV-hype met een grappige film die de verwarring rond elektrische auto's parodieert. Zelfspot over de overvloed aan EV-reclame. Positionering via humor op een druk moment.",target:"B2C / 25-50",feasibility:"🔶"},
+  {n:105,brand:"Hyundai",name:"Brilliant Moments",sector:"Automotive",kanaal:"Video + Social",trigger:"Emotie + Belonging",format:"Emotionele storytelling",mechanism:"Campagne toont hoe Hyundai-rijders op verrassende, onverwachte momenten worden geholpen door de auto. Kleine menselijke verhalen i.p.v. technische specs. Auto als betrouwbare partner in het leven.",target:"B2C / 30-50",feasibility:"✅"},
+  {n:106,brand:"Seat",name:"Born To",sector:"Automotive",kanaal:"Video + OOH",trigger:"Identiteit + Jeugd",format:"Lifestyle campagne",mechanism:"Seat positioneert zich als het Spaanse alternatief: levendiger, jonger, urbaner dan Duits. 'Born to' als statement van generatie-identiteit. Muziek, stad en vrijheid als campagne-DNA.",target:"B2C / 22-38",feasibility:"✅"},
+  {n:107,brand:"Peugeot",name:"Motion & Emotion",sector:"Automotive",kanaal:"Video + Print",trigger:"Emotie + Design",format:"Brand positioning",mechanism:"Peugeot herpositioneerde zich van budgetmerk naar premium via pure design-communicatie. Geen specs, enkel esthetiek en gevoel. Campagne die een perceptieshift forceerde.",target:"B2C / 30-50",feasibility:"🔶"},
+  {n:108,brand:"Porsche",name:"Sportscar Together",sector:"Automotive",kanaal:"Community + Events",trigger:"Belonging + Exclusiviteit",format:"Community event",mechanism:"Porsche-eigenaren worden uitgenodigd voor exclusieve rijdagen en events. Eigendom van een Porsche geeft toegang tot een club. De auto verkoopt de community, de community verkoopt de auto.",target:"B2C / 40-65",feasibility:"🔶"},
+  {n:109,brand:"Dacia",name:"No Fuss, Just Drive",sector:"Automotive",kanaal:"TV + Print",trigger:"Anti-establishment + Prijs",format:"Radicale eenvoud campagne",mechanism:"Dacia omarmt zijn imago als goedkoopste auto volledig. Geen excuses, geen vergelijkingen. 'Je betaalt voor de auto, niet voor de reclame.' Eerlijkheid als luxe positionering voor de prijsbewuste rijder.",target:"B2C / 30-55",feasibility:"✅"},
+  {n:110,brand:"Coolblue Fietsen",name:"Fietsen voor Werknemers",sector:"Mobiliteit / B2B",kanaal:"LinkedIn + Email + B2B",trigger:"Kostenreductie + Duurzaamheid",format:"B2B employee benefit",mechanism:"Fietslease als employee benefit via werkgever. B2B-campagne die HR-managers aanspreekt via fiscale voordelen. Werkgever = held, werknemer = blije fietser. Viraal via mond-aan-mond op de werkvloer.",target:"B2B / HR",feasibility:"✅"},
+
+  // 111-120: BOUW, INDUSTRIE & B2B
+  {n:111,brand:"Caterpillar",name:"Built For It Trials",sector:"B2B / Industrie",kanaal:"YouTube + Social",trigger:"Wow-factor + Bewijs",format:"Demonstration video",mechanism:"Caterpillar laat zijn machines spectaculaire stunts uitvoeren: Jenga spelen, een tightrope lopen. Kracht en precisie bewijzen via entertainment. B2B-viral die miljoenen B2C-mensen bereikte.",target:"B2B / Bouw + Industrie",feasibility:"🔶"},
+  {n:112,brand:"John Deere",name:"Farm Forward",sector:"B2B / Landbouw",kanaal:"Video + LinkedIn + Events",trigger:"Trots + Identiteit",format:"Farmer storytelling",mechanism:"John Deere vertelt de verhalen van boerenfamilies over generaties. Trots op het boerenbestaan als campagne-motor. Merk = partner van de familie, niet enkel machine-leverancier.",target:"B2B / Landbouw",feasibility:"✅"},
+  {n:113,brand:"Hilti",name:"Fleet Management",sector:"B2B / Bouw",kanaal:"Direct sales + LinkedIn",trigger:"Kostenbesparing + Gemak",format:"Service model als campagne",mechanism:"Hilti verkoopt geen gereedschap maar een abonnement: altijd het nieuwste gereedschap, altijd onderhouden. Het businessmodel IS de campagne. Klanten vergelijken de TCO en kiezen Hilti.",target:"B2B / Aannemers",feasibility:"🔶"},
+  {n:114,brand:"3M",name:"Post-It Note Origin Story",sector:"B2B / Industrie",kanaal:"PR + Content",trigger:"Curiositeit + Authenticiteit",format:"Origin story PR",mechanism:"Het verhaal van de uitvinding van de Post-It — een mislukte lijmstof die iemand anders geniaal gebruikte — verteld als campagne over innovatie-cultuur. Falen als merk-DNA.",target:"B2B / Corporate",feasibility:"✅"},
+  {n:115,brand:"Bostik",name:"The Bond",sector:"B2B / Bouw",kanaal:"Trade media + LinkedIn",trigger:"Vertrouwen + Bewijs",format:"Case study campagne",mechanism:"Bostik toont spectaculaire constructie-cases waarbij hun lijm de kritische verbinding was. Bewijslast via reële projecten. B2B-campagne die op trots en vertrouwen in vakmanschap speelt.",target:"B2B / Aannemers + Architecten",feasibility:"✅"},
+  {n:116,brand:"Fluvius",name:"Energie Renovatie Campagne",sector:"Energie / Overheid",kanaal:"OOH + Radio + Digital",trigger:"Loss aversion + Subsidie",format:"Bewustwordingscampagne",mechanism:"Vlaamse netbeheerder maakt renovatie-subsidies zichtbaar en simpel. Angst voor stijgende energiefactuur als trigger. Drempel verlagen via duidelijke stap-voor-stap communicatie.",target:"B2C / Huiseigenaars",feasibility:"✅"},
+  {n:117,brand:"Vasco",name:"Belgian Radiator Stories",sector:"B2B / Bouw",kanaal:"LinkedIn + Vakbladen",trigger:"Trots + Herkomst",format:"Made in Belgium storytelling",mechanism:"Vasco maakt radiatoren in België en maakt dit tot zijn grootste troef. Vakmanschap, herkomst en duurzaamheid als drieluik. B2B-campagne die architecten en installateurs overtuigt via trots.",target:"B2B / Architecten + Installateurs",feasibility:"✅"},
+  {n:118,brand:"Unilin",name:"Quick-Step Floors Originals",sector:"B2B / Bouw",kanaal:"Social + Retail + B2B",trigger:"Identiteit + Design",format:"Lifestyle + vakmanschap",mechanism:"Quick-Step toont hoe hun vloeren een ruimte compleet transformeren via before/after video's van echte interieurs. Architecten en particulieren tegelijk aangesproken. Vloer als designstatement.",target:"B2B + B2C / Interieur",feasibility:"✅"},
+  {n:119,brand:"Aliplast",name:"Architect Relations Program",sector:"B2B / Aluminium",kanaal:"Events + LinkedIn + Direct",trigger:"Authority + Belonging",format:"B2B relatie-programma",mechanism:"Aliplast organiseert exclusieve architectuur-studiedagen en bouwt een premium netwerk van specificerende architecten. Toegang tot kennis als reden om te komen. Verkoop volgt vanzelf.",target:"B2B / Architecten",feasibility:"✅"},
+  {n:120,brand:"Lyreco",name:"Sustainable Office",sector:"B2B / Office supplies",kanaal:"Email + LinkedIn + Sales",trigger:"Waarden + Kostenreductie",format:"B2B sustainability pitch",mechanism:"Lyreco herpositioneerde kantoorbenodigdheden als duurzame keuze. Groene producten + CO2-rapportage per bestelling. B2B-aankoop wordt ESG-rapportering-tool voor de klant.",target:"B2B / Office managers",feasibility:"🔶"},
+
+  // 121-130: FINANCE & VERZEKERINGEN
+  {n:121,brand:"Triodos Bank",name:"Wij Financieren Wat Telt",sector:"Finance",kanaal:"PR + Social + Print",trigger:"Waarden + Identiteit",format:"Activist brand",mechanism:"Triodos publiceert exact welke projecten ze financieren. Radicale transparantie als campagne. Klanten kiezen bewust voor een bank met een standpunt. Anti-bank als bank-campagne.",target:"B2C / 28-50",feasibility:"✅"},
+  {n:122,brand:"Monzo",name:"Coral Card Cult",sector:"Finance / Fintech",kanaal:"Social + Word of mouth",trigger:"Identiteit + Exclusiviteit",format:"Product design als campagne",mechanism:"Monzo's koraalrode betaalkaart is zo opvallend dat ze zichzelf verkoopt. Elke betaling is een gespreksstarter. De kaart IS de campagne. Wachtlijst-systeem creëerde extra FOMO.",target:"B2C / 20-38",feasibility:"🔶"},
+  {n:123,brand:"Revolut",name:"Referral Machine",sector:"Finance / Fintech",kanaal:"App + Email + Social",trigger:"Incentive + Social proof",format:"Referral program",mechanism:"Cashback voor zowel verwijzer als nieuwe gebruiker. Viraal groeimechanisme dat Revolut van 0 naar 30M gebruikers bracht. Elke tevreden klant is een salesperson.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:124,brand:"Argenta",name:"Bank voor Gewone Mensen",sector:"Finance",kanaal:"TV + Radio + Print",trigger:"Anti-establishment + Belonging",format:"Positionerings campagne",mechanism:"Argenta positioneert zich expliciet als de bank voor mensen die geen nood hebben aan dure private banking. Eerlijkheid en eenvoud als onderscheidende waarden in een sector vol jargon.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:125,brand:"Belfius",name:"Make It Happen",sector:"Finance",kanaal:"Video + Social + Sponsoring",trigger:"Identiteit + Empowerment",format:"Empowerment campagne",mechanism:"Belfius koppelt zich aan Belgische ambitie: startups, sport, cultuur. 'Make it happen' als call-to-action voor mensen die willen groeien. Bank als enabler van dromen.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:126,brand:"Axa",name:"Know You Can",sector:"Insurance",kanaal:"Video + Social",trigger:"Zekerheid + Empowerment",format:"Emotionele campagne",mechanism:"Verzekering hergepositioneerd als bevrijder in plaats van kostenpost. 'Als je weet dat je gedekt bent, durf je meer.' Angst omgekeerd naar zelfvertrouwen.",target:"B2C + B2B",feasibility:"✅"},
+  {n:127,brand:"Beobank",name:"Geen Verrassingen",sector:"Finance",kanaal:"OOH + Radio",trigger:"Vertrouwen + Eerlijkheid",format:"Anti-jargon campagne",mechanism:"Beobank belooft simpele, transparante bankkosten zonder kleine lettertjes. In een sector vol verborgen kosten is eerlijkheid de sterkste differentiator. Simpele boodschap, maximaal contrast.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:128,brand:"Wise (TransferWise)",name:"Real Cost of Sending Money",sector:"Finance / Fintech",kanaal:"Social + YouTube",trigger:"Verontwaardiging + Eerlijkheid",format:"Transparantie campagne",mechanism:"Wise toont exact hoeveel banken verdienen aan valutakosten die je niet ziet. Verontwaardiging als trigger om over te stappen. Data en eerlijkheid als wapen tegen grote banken.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:129,brand:"Europ Assistance",name:"Reis met Vertrouwen",sector:"Insurance / Travel",kanaal:"Email + Search + Social",trigger:"Angst + Geruststelling",format:"Moment-based marketing",mechanism:"Campagne die precies op het moment van reisboeken verschijnt. Angst voor onverwachte situaties activeren, direct gevolgd door de oplossing. Timing is het mechanisme.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:130,brand:"Nagelmackers",name:"Belgische Banktraditie",sector:"Finance",kanaal:"Print + OOH + PR",trigger:"Nostalgie + Authority",format:"Heritage campagne",mechanism:"Nagelmackers als oudste bank van België positioneert zijn leeftijd als kracht. Stabiliteit en continuïteit als antwoord op fintech-angst. Geschiedenis als differentiator.",target:"B2C / 40-70",feasibility:"✅"},
+
+  // 131-140: HORECA & FOOD
+  {n:131,brand:"Noma",name:"Reservations as PR",sector:"Horeca / Fine dining",kanaal:"PR + Social",trigger:"Exclusiviteit + FOMO",format:"Schaarste mechanic",mechanism:"Noma opent reservaties maar één keer per jaar voor een beperkt seizoen. De wachtlijst IS de campagne. Media schrijven erover zonder dat Noma één euro uitgeeft. Schaarste als meest krachtige marketingtool.",target:"B2C / 35-65",feasibility:"🔶"},
+  {n:132,brand:"Dôme sur Mer",name:"Lokale Chef Storytelling",sector:"Horeca",kanaal:"Social + PR + Video",trigger:"Herkomst + Authenticiteit",format:"Chef-as-brand campagne",mechanism:"De chef wordt het gezicht van het restaurant. Dagelijkse markbezoeken, leveranciersverhalen en kookpassie in video-format. Eten smaakt beter als je de mens erachter kent.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:133,brand:"Deliveroo",name:"Food for Thought",sector:"Food delivery / Tech",kanaal:"OOH + Social",trigger:"Humor + Herkenning",format:"Situationele humor campagne",mechanism:"Deliveroo maakt grappige OOH-campagnes gebaseerd op herkenbare eetsituaties: 'Voor als koken niet lukt na een lange dag.' Empathie voor de luie consument als core boodschap.",target:"B2C / 20-40",feasibility:"✅"},
+  {n:134,brand:"Ghent Table",name:"Gentse Gastronomie Route",sector:"Horeca / Toerisme",kanaal:"App + Social + PR",trigger:"Belonging + FOMO",format:"Lokale community campagne",mechanism:"Gezamenlijke campagne van Gentse restaurants: één app, één verhaal, één culinaire route. Concurrenten bundelen krachten voor meer toeristen. Stadsidentiteit als campagne-platform.",target:"B2C / 25-55",feasibility:"✅"},
+  {n:135,brand:"Puratos",name:"Taste Tomorrow",sector:"B2B / Food industry",kanaal:"Events + LinkedIn + Content",trigger:"Educatie + Authority",format:"Thought leadership + Research",mechanism:"Puratos publiceert jaarlijks een groot consumentenonderzoek over bakkerijtrends. Gratis data als magneet voor B2B-klanten. Bakkers en retailers gebruiken het rapport, Puratos staat top-of-mind.",target:"B2B / Bakkerij + Retail food",feasibility:"✅"},
+  {n:136,brand:"Brooklyn Brewery",name:"Open Source Beer",sector:"Food & Beverage",kanaal:"Community + PR + Social",trigger:"Co-creation + Belonging",format:"Open source product",mechanism:"Brooklyn Brewery publiceert brouwrecepten openbaar en nodigt thuisbrouwers uit. Community van makers bouwt het merk. Gastvrijheid en openheid als merkwaarden die loyaliteit creëren.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:137,brand:"Hello Fresh",name:"Unbox the Joy",sector:"Food / E-commerce",kanaal:"Social + Influencer + TV",trigger:"Gemak + Verrassing",format:"Unboxing campagne",mechanism:"De maaltijdbox als cadeau dat je aan jezelf geeft. Unboxing-moment als campagne-trigger. Influencers koken live mee. Gemak gecombineerd met beleving van het ontdekken van nieuwe ingrediënten.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:138,brand:"Zwarte Madame",name:"Lokale Koffie Brand",sector:"Food & Beverage / Retail",kanaal:"Social + In-store + Events",trigger:"Identiteit + Herkomst",format:"Lokale pride campagne",mechanism:"Belgisch koffiemerk dat zijn Gentse roots als onderscheidend element inzet. 'Lokaal gebrand' als positionering tegen internationale koffiereeksen. Vakmanschap zichtbaar gemaakt via video.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:139,brand:"Surprise Bag by TGTG",name:"Anti-Verspilling Horeca",sector:"Horeca / Food",kanaal:"App + Social",trigger:"Waarden + Prijs",format:"Platform campagne",mechanism:"Restaurants en bakkers verkopen einde-van-de-dag overschot via de Too Good To Go app. Win-win: minder verspilling + nieuwe klanten die kennismaken met de zaak. Duurzaamheid als traffic mechanic.",target:"B2C / 20-40",feasibility:"✅"},
+  {n:140,brand:"Bon Bon",name:"Fine Dining Documentaire",sector:"Horeca / Fine dining",kanaal:"Video + PR",trigger:"Fascinatie + Exclusiviteit",format:"Mini-documentaire",mechanism:"Restaurateur Guillaume Bracaval als protagonist van een culinaire documentaire. Keukenleven, obsessie en perfectie als entertainment. Restaurant wordt pilgrimage voor foodliefhebbers wereldwijd.",target:"B2C / 35-65",feasibility:"🔶"},
+
+  // 141-150: GEZONDHEID & WELZIJN
+  {n:141,brand:"Fitbit",name:"Find Your Fit",sector:"Health / Tech",kanaal:"Social + App",trigger:"Identiteit + Gamification",format:"Persoonlijk gezondheidsdata",mechanism:"Fitbit personaliseert fitness-doelen per gebruiker en maakt voortgang zichtbaar en deelbaar. Data-ownership als campagne: jouw gezondheid, jouw stats, jouw verhaal. Community versterkt retentie.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:142,brand:"Headspace",name:"Work Smarter, Not Harder",sector:"Health / SaaS",kanaal:"B2B + Social + Podcast",trigger:"Productiviteit + Welzijn",format:"B2B wellness pitch",mechanism:"Headspace richt zich op bedrijven: meditatie als productiviteits-tool. 'Gezonde medewerkers presteren beter' als B2B-argument. HR-managers aanspreken via ROI-taal van welzijn.",target:"B2B / HR + B2C",feasibility:"✅"},
+  {n:143,brand:"Peloton",name:"The Output",sector:"Health / Tech",kanaal:"Community + Social + App",trigger:"Belonging + Identiteit",format:"Community content platform",mechanism:"Peloton-instructeurs worden celebrities. Riders streamen thuis maar voelen zich deel van een globale community. Live-lessen creëren FOMO. Gebruikers posten trots hun output-stats.",target:"B2C / 30-55",feasibility:"🔶"},
+  {n:144,brand:"Pfizer",name:"Science Will Win",sector:"Pharma / B2B",kanaal:"PR + LinkedIn + Video",trigger:"Vertrouwen + Authority",format:"Corporate thought leadership",mechanism:"Pfizer lanceerde tijdens COVID een campagne die wetenschap als held positioneert. Transparantie over het onderzoeksproces als vertrouwensopbouw. Wetenschappers als menselijk gezicht van het bedrijf.",target:"B2B + B2C",feasibility:"🔶"},
+  {n:145,brand:"Kinesitherapie Vlaanderen",name:"Beweeg Meer Campagne",sector:"Gezondheid / Overheid",kanaal:"OOH + Social + Radio",trigger:"Angst + Empowerment",format:"Bewustwordingscampagne",mechanism:"Campagne die Vlamingen bewust maakt van zitgedrag via herkenbare humor. Drempel verlagen door kinesist te positioneren als coach, niet als dokter. Preventie als boodschap, actie als CTA.",target:"B2C breed",feasibility:"✅"},
+  {n:146,brand:"Zorg en Gezondheid",name:"Vaccinatiecampagne",sector:"Overheid / Gezondheid",kanaal:"TV + Social + OOH",trigger:"Sociale norm + Bescherming",format:"Social proof campagne",mechanism:"'De meeste mensen in jouw gemeente zijn al gevaccineerd.' Sociale norm als sterkste trigger voor gezondheidsgedrag. Lokale data maakt de boodschap persoonlijk en urgent.",target:"B2C breed",feasibility:"✅"},
+  {n:147,brand:"Nütrl Vodka Seltzer",name:"Anti-Ingredient Campaign",sector:"Food & Beverage",kanaal:"Social + OOH",trigger:"Eerlijkheid + Anti-establishment",format:"Ingredient transparantie",mechanism:"Nütrl somt precies op wat er NIET in zit: geen suiker, geen additieven, geen fratsen. In een categorie vol claims is eerlijkheid de sterkste differentiator. Negatieve lijst als positief verkoopargument.",target:"B2C / 25-40",feasibility:"✅"},
+  {n:148,brand:"Nespresso",name:"What Else?",sector:"FMCG / Lifestyle",kanaal:"TV + Print + Social",trigger:"Exclusiviteit + Humor",format:"Celebrity endorsement",mechanism:"George Clooney als onverwachte koffie-ambassadeur. Zelfspot en klasse gecombineerd. 'What else?' als tagline die koffie verheft tot luxe-moment. Consistent over tientallen jaren.",target:"B2C / 30-60",feasibility:"🔶"},
+  {n:149,brand:"Decuypere Kinesitherapie",name:"Lokale Specialist Campagne",sector:"Gezondheid / KMO",kanaal:"Google + Social + Reviews",trigger:"Vertrouwen + Nabijheid",format:"Lokale authority opbouw",mechanism:"Kinesist bouwt lokale autoriteit via patiëntenverhalen, Google-reviews en educatieve video's over veelvoorkomende kwalen. Zoekopdrachten omzetten naar vertrouwen vóór het eerste consult.",target:"B2C / Lokaal",feasibility:"✅"},
+  {n:150,brand:"Runners World",name:"Run Streak Community",sector:"Sport / Media",kanaal:"App + Social + Email",trigger:"Loss aversion + Belonging",format:"Community challenge",mechanism:"Dagelijkse loopstreak als community-bindmiddel. Lopen op 1 januari starten en elke dag bijhouden. Sociaal contract met de community maakt stoppen moeilijker dan verdergaan.",target:"B2C / Actief",feasibility:"✅"},
+
+  // 151-160: MODE & LIFESTYLE
+  {n:151,brand:"Patagonia",name:"Worn Wear Program",sector:"Fashion / Outdoor",kanaal:"Social + In-store + PR",trigger:"Waarden + Anti-consumptie",format:"Circulaire economie campagne",mechanism:"Patagonia repareert, verkoopt tweedehands Patagonia-kledij en promoot dit actief. Anti-nieuw-kopen als campagne voor een kledingbedrijf. Klanten worden ambassadeurs van duurzaamheid.",target:"B2C / 28-50",feasibility:"🔶"},
+  {n:152,brand:"Zalando",name:"Free to Be",sector:"Fashion / E-com",kanaal:"Video + Social",trigger:"Inclusiviteit + Identiteit",format:"Inclusiviteitscampagne",mechanism:"Zalando toont een brede waaier aan lichaamstypes, leeftijden en stijlen. Mode als zelfexpressie voor iedereen. Brede doelgroep voelt zich gezien en daardoor aangesproken.",target:"B2C breed",feasibility:"✅"},
+  {n:153,brand:"Zara",name:"Zero Advertising Model",sector:"Fashion",kanaal:"Retail + PR + Social",trigger:"Exclusiviteit + Schaarste",format:"Anti-reclame model",mechanism:"Zara geeft nagenoeg niets uit aan reclame. Snelle collectie-rotaties, minimale voorraad en mond-aan-mond zijn de motor. Elke winkelbezoek is een ontdekking. Schaarste als campagne.",target:"B2C / 20-45",feasibility:"🔶"},
+  {n:154,brand:"Cos",name:"Quiet Luxury",sector:"Fashion",kanaal:"PR + OOH + Social",trigger:"Identiteit + Anti-logo",format:"Stille luxe campagne",mechanism:"Cos positioneert zich als premium zonder logo's te tonen. Minimalisme en kwaliteit als boodschap voor consumenten die zich afzetten tegen uitgesproken luxemerken. Subtiliteit als statement.",target:"B2C / 28-50",feasibility:"🔶"},
+  {n:155,brand:"Vinted",name:"Tweedehands is Cool",sector:"Fashion / Platform",kanaal:"TV + Social + Influencer",trigger:"Waarden + Prijs + Identiteit",format:"Normalisering campagne",mechanism:"Vinted ontsnapte het stigma van tweedehands kopen door het te herpositioneren als slimme én duurzame keuze. Influencers tonen hun Vinted-vondsten trots. Schaamte omgekeerd naar trots.",target:"B2C / 16-40",feasibility:"✅"},
+  {n:156,brand:"A.P.C.",name:"Denim Stories",sector:"Fashion",kanaal:"Social + PR",trigger:"Authenticiteit + Herkomst",format:"Product storytelling",mechanism:"A.P.C. vertelt het verhaal van hun raw denim: hoe hij met jou meeverandert, hoe hij na maanden dragen uniek wordt. Jouw spijkerbroek wordt een persoonlijk object. Patina als campagne.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:157,brand:"Filling Pieces",name:"Slow Fashion Amsterdam",sector:"Fashion",kanaal:"Social + PR + Community",trigger:"Identiteit + Vakmanschap",format:"Artisanale brand campagne",mechanism:"Amsterdams schoenenmerk toont het maakproces in detail: leer, naden, zolen. Transparantie over productie als premium-signaal. Klanten kopen het ambacht, niet de schoen.",target:"B2C / 25-40",feasibility:"✅"},
+  {n:158,brand:"Levi's",name:"Buy Better, Wear Longer",sector:"Fashion",kanaal:"Social + OOH + Video",trigger:"Waarden + Nostalgie",format:"Duurzaamheidscampagne",mechanism:"Levi's moedigt klanten aan om minder te kopen maar beter. Paradoxale campagne van een kledingbedrijf die net daardoor vertrouwen wekt. Jeansmerft als duurzaamheidsbeweger.",target:"B2C / 20-45",feasibility:"✅"},
+  {n:159,brand:"Hema",name:"Gewoon Hema",sector:"Retail / Lifestyle",kanaal:"TV + Social + In-store",trigger:"Nostalgie + Belonging",format:"Nederlandsheid campagne",mechanism:"Hema omarmt zijn imago als typisch Hollands alledaags merk. Rookworsten, stroopwafels, simpele kwaliteit. 'Gewoon' als krachtigste positionering in een wereld vol premium claims.",target:"B2C breed",feasibility:"✅"},
+  {n:160,brand:"Scotch & Soda",name:"Amsterdam Originals",sector:"Fashion",kanaal:"Social + PR + Retail",trigger:"Identiteit + Stad",format:"City as brand campagne",mechanism:"Scotch & Soda maakt Amsterdam tot een merk-ingredient. De stad als inspiratiebron voor elke collectie. Internationale kopers kopen een stukje Amsterdam-gevoel mee.",target:"B2C / 25-45",feasibility:"🔶"},
+
+  // 161-170: ONDERWIJS, HR & RECRUITMENT
+  {n:161,brand:"KU Leuven",name:"The World Needs You",sector:"Onderwijs",kanaal:"Video + Social + OOH",trigger:"Identiteit + Ambitie",format:"Aspiratie campagne",mechanism:"KU Leuven positioneert zijn studenten als toekomstige probleemoplossers voor mondiale uitdagingen. Wetenschap als heldenverhaal. Studiekeuze wordt een mission statement.",target:"B2C / 17-25",feasibility:"✅"},
+  {n:162,brand:"Duolingo for Schools",name:"Teacher Toolkit",sector:"Edtech / B2B",kanaal:"LinkedIn + Email + Direct",trigger:"Gemak + Gratis",format:"Freemium B2B campagne",mechanism:"Gratis klasroomtools voor leerkrachten als voet in de deur. Scholen worden Duolingo-ambassadeurs bij ouders en leerlingen. Freemium-model schaalbaar via onderwijs-netwerk.",target:"B2B / Onderwijs",feasibility:"✅"},
+  {n:163,brand:"Securex",name:"HR Pulse",sector:"B2B / HR",kanaal:"LinkedIn + Events + Content",trigger:"Educatie + Authority",format:"Thought leadership",mechanism:"Securex publiceert kwartaalrapport over Belgische arbeidsmarkt, absenteïsme en HR-trends. Gratis data trekt HR-managers aan. Expertise wordt vertrouwen, vertrouwen wordt klantrelatie.",target:"B2B / HR + KMO",feasibility:"✅"},
+  {n:164,brand:"LinkedIn Learning",name:"Skills for Tomorrow",sector:"Edtech / B2B",kanaal:"LinkedIn + Email",trigger:"Angst + Empowerment",format:"Future of work campagne",mechanism:"LinkedIn Learning speelt in op de angst voor job-automatisering. 'De banen van morgen vereisen skills van vandaag.' Leerplatform als loopbaanverzekering. B2B via bedrijven, B2C via individuen.",target:"B2B + B2C / Professionals",feasibility:"✅"},
+  {n:165,brand:"Randstad",name:"Human Forward",sector:"HR / Recruitment",kanaal:"Video + LinkedIn + OOH",trigger:"Menselijkheid + Tech",format:"Positioneringscampagne",mechanism:"Randstad positioneert zich als het menselijke alternatief in een wereld van AI-gedreven recruitment. Technologie + menselijk contact als differentiator. B2B én B2C aangesproken via één boodschap.",target:"B2B + B2C",feasibility:"✅"},
+  {n:166,brand:"Solvay",name:"Dare to Chemistry",sector:"B2B / Industrie + HR",kanaal:"Video + LinkedIn + Campussen",trigger:"Identiteit + Trots",format:"Employer branding",mechanism:"Solvay positioneert chemie als de sector die de grootste problemen van de planeet oplost. Ingenieurs en wetenschappers voelen trots op hun vak. Rekrutering via purpose i.p.v. loon.",target:"B2B / HR + Studenten",feasibility:"✅"},
+  {n:167,brand:"Accent Jobs",name:"Echte Verhalen, Echte Jobs",sector:"HR / Recruitment",kanaal:"Social + Video + OOH",trigger:"Authenticiteit + Social proof",format:"UGC recruitment campagne",mechanism:"Werknemers vertellen zelf hun jobreis in korte video's. Geen acteurs, geen scripts. Potentiële kandidaten identificeren zich met echte mensen en solliciteren sneller.",target:"B2C / Werkzoekenden",feasibility:"✅"},
+  {n:168,brand:"Odoo",name:"One App to Rule Them All",sector:"SaaS / B2B",kanaal:"Google + LinkedIn + Events",trigger:"Kostenreductie + Eenvoud",format:"Anti-complexiteit campagne",mechanism:"Odoo positioneert zijn alles-in-één ERP als alternatief voor tien losse tools. Complexiteit van concurrenten als pijnpunt. Demo als campagne-mechanic: zie het live voor je koopt.",target:"B2B / KMO",feasibility:"✅"},
+  {n:169,brand:"Howest",name:"Think Howest",sector:"Onderwijs",kanaal:"Social + Events + Video",trigger:"Identiteit + Praktijk",format:"Praktijkgericht brand",mechanism:"Howest toont studenten die al tijdens hun opleiding aan echte projecten werken. 'Geen theorie, maar praktijk' als ultieme differentiator tegenover klassieke universiteiten.",target:"B2C / 16-25",feasibility:"✅"},
+  {n:170,brand:"VDAB",name:"Omscholing Campagne",sector:"Overheid / HR",kanaal:"TV + Radio + Social",trigger:"Hoop + Empowerment",format:"Transformatie campagne",mechanism:"VDAB toont concrete transformatieverhalen: iemand die van boekhouder naar verpleger werd omgeschoold. Realistische hoop als trigger. Drempel verlagen door identificatie met echte mensen.",target:"B2C / Werkzoekenden",feasibility:"✅"},
+
+  // 171-180: SPORT & EVENTS
+  {n:171,brand:"Adidas",name:"Impossible is Nothing",sector:"Sport",kanaal:"Video + OOH + Social",trigger:"Identiteit + Inspiratie",format:"Aspiratie campagne",mechanism:"Getuigenissen van atleten die het 'onmogelijke' bereikten. Elk verhaal begint met een mislukking of twijfel. Adidas als aanwezige partner in de donkere momenten vóór doorbraak.",target:"B2C breed",feasibility:"✅"},
+  {n:172,brand:"Under Armour",name:"I Will What I Want",sector:"Sport",kanaal:"Video + Social",trigger:"Identiteit + Anti-establishment",format:"Empowerment campagne",mechanism:"Misty Copeland, ballerina afgewezen door topscholen, wordt het gezicht. Haar eigen wilskracht i.p.v. talent als boodschap. UA positioneert zich als merk voor mensen die het systeem weerstaan.",target:"B2C / Vrouwen",feasibility:"✅"},
+  {n:173,brand:"Red Bull Rampage",name:"Event als Content Engine",sector:"Sport / Events",kanaal:"YouTube + Social + PR",trigger:"Spectacle + FOMO",format:"Event content strategie",mechanism:"Red Bull's extreme sports events zijn primair content-productiemachines. Het event IS de campagne. Duizenden uren content per event, miljoenen views wereldwijd, nul traditionele media spend nodig.",target:"B2C / 16-35",feasibility:"🔶"},
+  {n:174,brand:"Tour de France",name:"Grand Départ Belgium",sector:"Sport / Events / Toerisme",kanaal:"PR + OOH + Social + TV",trigger:"Trots + FOMO",format:"Stadsevent campagne",mechanism:"Een stad of land als startplaats van de Tour creëert nationale trots en toeristische aandacht. Lokale bedrijven en overheden investeren samen. Sportief evenement als economisch en brand-instrument.",target:"B2C + B2B breed",feasibility:"🔶"},
+  {n:175,brand:"Ironman",name:"Anything is Possible",sector:"Sport / Events",kanaal:"Community + Social + PR",trigger:"Identiteit + Belonging",format:"Community lifestyle merk",mechanism:"Ironman verkoop geen race maar een identiteitsverandering. Finishers zijn 'Ironmen'. Het M-dot tattoo is de ultieme merkidentificatie. Community van gelijkgestemden als sterkste verkooptool.",target:"B2C / 30-55",feasibility:"🔶"},
+  {n:176,brand:"Sportpaleis",name:"Fan First Campagne",sector:"Entertainment / Events",kanaal:"Email + Social + App",trigger:"Belonging + FOMO",format:"Fan experience platform",mechanism:"Sportpaleis bouwt een fanplatform met early access, backstage content en loyaliteitspunten. Fans worden members. Ticketverkoop als bijproduct van community-building.",target:"B2C / 18-55",feasibility:"✅"},
+  {n:177,brand:"Lotto Cycling",name:"Belgisch Wielertrots",sector:"Sport / Sponsoring",kanaal:"Social + TV + PR",trigger:"Trots + Belonging",format:"Nationaal pride campagne",mechanism:"Lotto koppelt zich aan Belgisch wielererfgoed. Niet het product maar het gevoel van samen winnen als campagne-kern. Sponsoring zichtbaar gemaakt via verhalen van renners, niet van producten.",target:"B2C / 30-65",feasibility:"✅"},
+  {n:178,brand:"CrossFit",name:"The Whiteboard",sector:"Sport / Community",kanaal:"Social + Community + App",trigger:"Belonging + Identiteit",format:"Community gamification",mechanism:"Elke CrossFit box schrijft de WOD op het whiteboard. Iedereen doet hetzelfde. Scores posten creëert competitie en verbinding. Gemeenschap rondom een dagelijks ritueel.",target:"B2C / 22-45",feasibility:"✅"},
+  {n:179,brand:"Zwift",name:"Virtual Racing League",sector:"Sport / Gaming / Tech",kanaal:"App + Social + Twitch",trigger:"Belonging + Competitie",format:"Gaming mechanic voor sport",mechanism:"Zwift maakt indoor fietsen sociaal via een virtuele wereld. Races, events en groepsritten online. Gamification van sport trekt gamers én sporters aan. Nieuw crossover-publiek gecreëerd.",target:"B2C / 25-50",feasibility:"🔶"},
+  {n:180,brand:"Decathlon Running",name:"First 5K Program",sector:"Retail / Sport",kanaal:"App + Social + In-store",trigger:"Empowerment + Belonging",format:"Beginner community",mechanism:"Decathlon begeleidt absolute beginners naar hun eerste 5km via een gratis app en lokale community. In-store starterkit als trigger. Van beginner naar loyale klant via een gedeelde mijlpaal.",target:"B2C / 25-50",feasibility:"✅"},
+
+  // 181-190: DUURZAAMHEID & MAATSCHAPPIJ
+  {n:181,brand:"Interface",name:"Mission Zero",sector:"B2B / Industrie",kanaal:"PR + LinkedIn + Events",trigger:"Waarden + Purpose",format:"Corporate purpose campagne",mechanism:"Tapijttegelbedrijf Interface belooft in 1994 nul ecologische impact tegen 2020. Het doel IS het merk. Elk jaar communiceren over voortgang. B2B-klanten kiezen Interface vanwege de missie.",target:"B2B / Architecten + Facility",feasibility:"🔶"},
+  {n:182,brand:"The Ocean Cleanup",name:"Trash of the Titans",sector:"NGO / Tech",kanaal:"PR + Social + Video",trigger:"Empowerment + Schuldgevoel",format:"Tech-driven PR campagne",mechanism:"Boyan Slat's verhaal van 18-jarige die 's werelds grootste oceaan-opruimproject startte. Technologie als held. Donateurs kopen niet enkel een goed gevoel maar resultaat in getallen.",target:"B2C / 25-50",feasibility:"🔶"},
+  {n:183,brand:"Ecosia",name:"Plant Trees While You Search",sector:"Tech / NGO",kanaal:"Social + PR + Word of mouth",trigger:"Waarden + Gemak",format:"Activist product",mechanism:"Zoekmachine die reclame-inkomsten gebruikt om bomen te planten. Elke zoekopdracht doet iets goeds. De switch van Google naar Ecosia is de enige vereiste actie. Doel ingebakken in het product.",target:"B2C / 20-45",feasibility:"✅"},
+  {n:184,brand:"Ben & Jerry's",name:"If It's Melted, It's Ruined",sector:"FMCG",kanaal:"Social + PR + Packaging",trigger:"Waarden + Humor",format:"Activist brand",mechanism:"Ben & Jerry's maakt politieke statements via ijsreclame. Smaak-namen als 'Pecan Resist'. Klanten kiezen bewust voor een merk met een standpunt. Controverse als campagne-brandstof.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:185,brand:"Fairphone",name:"The Phone That Cares",sector:"Tech / Duurzaamheid",kanaal:"PR + Social + Direct",trigger:"Waarden + Transparantie",format:"Radicale transparantie campagne",mechanism:"Fairphone publiceert exact hoeveel elke leverancier betaald krijgt en welke materialen gebruikt worden. Totale supply-chain transparantie als campagne. Ideaal voor bewuste consumenten.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:186,brand:"Renewi",name:"Waste No More",sector:"B2B / Milieu",kanaal:"LinkedIn + Events + PR",trigger:"Waarden + Kostenreductie",format:"Circulaire economie B2B",mechanism:"Renewi herpositioneert afval als grondstof. B2B-campagne die bedrijven overtuigt dat afvalbeheer een competitief voordeel is, niet enkel een kostenpost. Duurzaamheid als businesscase.",target:"B2B / Operations",feasibility:"✅"},
+  {n:187,brand:"Ecover",name:"Green Works",sector:"FMCG / Duurzaamheid",kanaal:"In-store + Social + PR",trigger:"Waarden + Identiteit",format:"Activist FMCG brand",mechanism:"Ecover maakt ecologische schoonmaakmiddelen en communiceert hierover radicaal transparant. Verpakkingen uitleggen ingrediënten. Merk als partner in bewuste consumptiekeuze.",target:"B2C / 28-50",feasibility:"✅"},
+  {n:188,brand:"Recupel",name:"Geef Je Toestel Een Tweede Leven",sector:"Overheid / Milieu",kanaal:"OOH + TV + Social",trigger:"Schuldgevoel + Gemak",format:"Bewustwordingscampagne",mechanism:"Recupel maakt elektrorecyclage zichtbaar en eenvoudig. Humor over oude toestellen in la en kelder. Drempel wegnemen via duidelijke aanwijzingen. Sociale norm: iedereen recyleert.",target:"B2C breed",feasibility:"✅"},
+  {n:189,brand:"Dopper",name:"Wave the Change",sector:"FMCG / Duurzaamheid",kanaal:"Social + B2B + Events",trigger:"Identiteit + Waarden",format:"Product als statement",mechanism:"Dopper-fles als zichtbaar symbool van plasticvrije keuze. B2B via scholen en bedrijven als merkpartners. Elk drinkmoment is een mini-campagne voor duurzaamheid.",target:"B2C + B2B / 20-45",feasibility:"✅"},
+  {n:190,brand:"Greenpeace",name:"Save the Arctic",sector:"NGO",kanaal:"Social + PR + Influencer",trigger:"Emotie + Verontwaardiging",format:"Digitale activisme campagne",mechanism:"Greenpeace creëert een fictief koninkrijk in de Arctische zee, nodigt mensen uit om burgers te worden. 2,7M digitale burgers in 3 weken. Gamification van activisme.",target:"B2C / 20-50",feasibility:"🔶"},
+
+  // 191-200: INTERNATIONALE DEEP-CUTS & UNIEK
+  {n:191,brand:"Blendtec",name:"Will It Blend?",sector:"Tech / FMCG",kanaal:"YouTube + Social",trigger:"Curiositeit + Humor",format:"Demonstration video",mechanism:"CEO blent iPhones, golfballen en vuurwerk in hun blender. Laagbudget YouTube-serie die de kracht van het product absurd bewijst. Van niche B2B naar cultureel fenomeen via virale humor.",target:"B2C breed",feasibility:"✅"},
+  {n:192,brand:"Cards Against Humanity",name:"Buy Nothing Day",sector:"Games",kanaal:"Social + PR",trigger:"Anti-establishment + Humor",format:"PR-stunt",mechanism:"Op Black Friday adverteerden ze een lege doos voor $5. Uitverkocht. Commentaar op consumentisme dat ook hun eigen klanten aanspreekt. Boycot van Black Friday als marketingevent.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:193,brand:"Method",name:"People Against Dirty",sector:"FMCG / Duurzaamheid",kanaal:"Social + PR + In-store",trigger:"Identiteit + Waarden",format:"Activist FMCG",mechanism:"Method positioneert schoonmaakmiddelen als milieuactivisme. 'People against dirty' als merk-beweging. Klanten zijn niet kopers maar leden van een beweging. Verpakking als designstatement.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:194,brand:"Innocent Drinks",name:"Little Drinks Big Dreams",sector:"FMCG",kanaal:"Packaging + Social + PR",trigger:"Humor + Warmte",format:"Copy-gedreven merk",mechanism:"Innocent's verpakkingen bevatten grappige, persoonlijke teksten die mensen doen lachen op de keukentafel. Packaging als dagelijks micro-contactmoment. Toon als onderscheidend merkgegeven.",target:"B2C breed",feasibility:"✅"},
+  {n:195,brand:"Poo-Pourri",name:"Girls Don't Poop",sector:"FMCG",kanaal:"YouTube + Social",trigger:"Humor + Taboe-doorbreking",format:"Viral video",mechanism:"Video waarbij een elegante vrouw taboe rond toiletgebruik doorbreekt met scherpe humor. $60M omzet na viraal gaan. Taboe als campagne-mechanisme: het gesprek starten dat iedereen vermijdt.",target:"B2C breed",feasibility:"✅"},
+  {n:196,brand:"Hiut Denim",name:"Do One Thing Well",sector:"Fashion / KMO",kanaal:"Email + Social + PR",trigger:"Vakmanschap + Anti-massa",format:"Radicale focus campagne",mechanism:"Hiut maakt enkel jeans, niets anders. 'Do one thing well' als manifest. Elk productdetail wordt een verhaal. KMO die groeit via obsessieve kwaliteit en transparantie over het maakproces.",target:"B2C / 30-55",feasibility:"✅"},
+  {n:197,brand:"BrewDog",name:"Equity for Punks",sector:"Food & Beverage",kanaal:"Direct + Social + PR",trigger:"Belonging + Anti-establishment",format:"Crowdfunding als campagne",mechanism:"BrewDog financierde groei via crowdfunding bij fans. Klanten worden aandeelhouders en superambassadeurs. Elke drinker heeft nu een financieel belang in het succes van het merk.",target:"B2C / 22-40",feasibility:"🔶"},
+  {n:198,brand:"Ooni Pizza Ovens",name:"Home Pizza Revolution",sector:"Retail / Food",kanaal:"Social + YouTube + Community",trigger:"Identiteit + Vakmanschap",format:"Community campagne",mechanism:"Ooni bouwt een community van thuispizzabakkers via recepten, challenges en UGC. Het oven is het middelpunt van een lifestyle. Klanten kopen geen toestel maar een identiteit als pizzamaker.",target:"B2C / 28-50",feasibility:"✅"},
+  {n:199,brand:"Tushy",name:"Hello Tushy, Bye Bye TP",sector:"FMCG / E-com",kanaal:"Social + YouTube + PR",trigger:"Humor + Taboe-doorbreking",format:"Disruptieve categorie-campagne",mechanism:"Bidettopauze aangevallen via hilarische humor. Taboe rond toiletgewoonten doorbroken. Duurzaamheids-argument (minder papier) gecombineerd met humor. Van niche naar mainstream via lachen.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:200,brand:"Liquid Death",name:"Murder Your Thirst",sector:"Food & Beverage",kanaal:"Social + Events + Retail",trigger:"Identiteit + Anti-establishment",format:"Subcultuur campagne",mechanism:"Water in blikjes met death metal-esthetiek. Ironie als campagne-kern: het meest onschuldige product in het meest hardcore jasje. Drinkers van Liquid Death kopen een identiteit, geen water.",target:"B2C / 18-35",feasibility:"🔶"},
+
+  // ═══════════════════════════════════════════
+  // BATCH 3 — CAMPAGNES 201-300
+  // Focus: Toerisme, Vastgoed, Telecom, Luxe, Media/Publishing,
+  // Non-profit, Onderwijs verdiept, Lokale Belgische KMO-cases,
+  // Seizoensgebonden, Retail verdiept, Pricing psychology
+  // ═══════════════════════════════════════════
+
+  // 201-210: TOERISME & DESTINATION MARKETING
+  {n:201,brand:"Visit Flanders",name:"Undisc Overed",sector:"Toerisme / Overheid",kanaal:"Social + PR + Video",trigger:"Curiositeit + Trots",format:"Hidden gems campagne",mechanism:"Visit Flanders toonde bewust de minst bekende plekken van Vlaanderen. Contradicties uitlokken bij locals ('dat bestaat echt?') genereerde organisch bereik. Trots op het onbekende eigen land.",target:"B2C / Toeristen nationaal + internationaal",feasibility:"✅"},
+  {n:202,brand:"Iceland Tourism",name:"Inspired By Iceland",sector:"Toerisme",kanaal:"Social + Video + UGC",trigger:"FOMO + Identiteit",format:"UGC destination campagne",mechanism:"IJsland nodigde mensen uit hun verhalen te delen via een online platform. Reizigers worden ambassadeurs. Authenticiteit van echte bezoekers overtuigt beter dan gelikte campagnebeelden.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:203,brand:"New Zealand",name:"100% Pure New Zealand",sector:"Toerisme",kanaal:"TV + OOH + Online",trigger:"Escapisme + Natuur",format:"Destination branding",mechanism:"Nieuw-Zeeland positioneerde zich als de meest ongerepte natuur ter wereld. Lange termijn consistent concept dat Lord of the Rings versterkte. Natuur als belofte én als productdifferentiator.",target:"B2C / 28-55",feasibility:"🔶"},
+  {n:204,brand:"Amsterdam Marketing",name:"I Amsterdam",sector:"Toerisme / Stad",kanaal:"OOH + Social + PR",trigger:"Identiteit + Trots",format:"City branding",mechanism:"Rood-witte letters als Instagram-magneet. Stadsidentiteit als foto-prop voor bezoekers. Locals en toeristen beiden aangesproken. Later verwijderd wegens overtourism — wat ook PR genereerde.",target:"B2C breed",feasibility:"✅"},
+  {n:205,brand:"Booking.com",name:"Booking.yeah",sector:"Travel / Platform",kanaal:"TV + Social + Radio",trigger:"Humor + Gemak",format:"Positioneringscampagne",mechanism:"'Booking.yeah' als onverwachte, menselijke uitroep van opluchting bij het boeken. Humor in een categorie vol vergelijkingssites. Booking positioneert zich als het gevoel na de juiste keuze.",target:"B2C breed",feasibility:"✅"},
+  {n:206,brand:"Airbnb Experiences",name:"Live Like a Local",sector:"Travel / Platform",kanaal:"App + Social",trigger:"Authenticiteit + FOMO",format:"Platformuitbreiding campagne",mechanism:"Airbnb breidt uit van logies naar belevenissen bij locals. Toerisme hergedefinieerd als culturele onderdompeling. Hosts zijn nieuwe influencers. Reizen = verbinding, niet enkel verplaatsing.",target:"B2C / 25-45",feasibility:"🔶"},
+  {n:207,brand:"Tomorrowland",name:"The World Is Yours",sector:"Events / Entertainment",kanaal:"Video + Social + PR",trigger:"FOMO + Magie",format:"Fantasy event campagne",mechanism:"Tomorrowland verkoopt geen muziekfestival maar een andere wereld. De aftermovie IS de campagne voor volgend jaar. Mensen die er niet bij waren, willen volgend jaar per se aanwezig zijn.",target:"B2C / 18-40",feasibility:"🔶"},
+  {n:208,brand:"Visit Gent",name:"Gent, de Slimme Stad",sector:"Toerisme / Overheid",kanaal:"Social + PR + Events",trigger:"Trots + Belonging",format:"Stadsidentiteit campagne",mechanism:"Gent positioneert zich als progressieve, fietsvriendelijke, creatieve stad. Locals worden ambassadeurs. Stedentrips aangetrokken via authentic verhalen van bewoners, niet van toeristische persbureaus.",target:"B2C / 25-45",feasibility:"✅"},
+  {n:209,brand:"De Lijn Kust",name:"Kusttram Beleving",sector:"Transport / Toerisme",kanaal:"Social + Video + PR",trigger:"Nostalgie + Belonging",format:"Heritage campagne",mechanism:"De langste tram ter wereld als toeristische beleving positioneren. Reiserverhalen van families, koppels en wandelaars. Nostalgie voor de kust gecombineerd met praktisch vervoer.",target:"B2C / 30-65",feasibility:"✅"},
+  {n:210,brand:"Ibis Hotels",name:"Ibis Styles Design Campagne",sector:"Hospitality",kanaal:"Social + PR + In-store",trigger:"Verrassing + Identiteit",format:"Design democratisering",mechanism:"Ibis liet kunstenaars elk hotel anders inrichten. Budgethotel met kunstenaarsidentiteit. Gasten ontdekken het concept via sociale media voor ze aankomen. Design als onderscheidend element in budgetsegment.",target:"B2C / 25-45",feasibility:"🔶"},
+
+  // 211-220: VASTGOED & INTERIEUR
+  {n:211,brand:"Realo",name:"Slimmer Zoeken",sector:"Vastgoed / Tech",kanaal:"Google + Social + PR",trigger:"Gemak + Data",format:"Tool-driven campagne",mechanism:"Realo toont huurprijzen en koopprijzen per straat via een gratis kaart. Data als magneet voor potentiële kopers. Gratis tool trekt bezoekers die later klant worden.",target:"B2C / 28-50",feasibility:"✅"},
+  {n:212,brand:"ERA Belgium",name:"Makelaar met een Missie",sector:"Vastgoed",kanaal:"Social + Video + Local",trigger:"Vertrouwen + Menselijkheid",format:"Menselijk makelaar brand",mechanism:"ERA toont de makelaars als echte mensen met echte verhalen. In een sector vol anonieme kantoren brengt menselijkheid differentiatie. Klanten kiezen een persoon, niet een bedrijf.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:213,brand:"Axel Vervoordt",name:"Timeless Design",sector:"Vastgoed / Interieur / Luxe",kanaal:"PR + Events + Editorial",trigger:"Exclusiviteit + Authority",format:"Thought leadership luxe",mechanism:"Axel Vervoordt publiceert boeken, exposeert op Art Basel en werkt met celebrities. Zijn naam IS zijn campagne. Wabi-sabi filosofie als lifestyle-positionering die klanten aanspreekt via fascinatie.",target:"B2C / 45-70 (HNWI)",feasibility:"🔶"},
+  {n:214,brand:"Heylen Vastgoed",name:"Lokale Marktkennis",sector:"Vastgoed / KMO",kanaal:"Social + Google + Folders",trigger:"Vertrouwen + Nabijheid",format:"Lokale authority campagne",mechanism:"Heylen maakt hyperloale content over specifieke wijken en gemeenten. 'Wij kennen elke straat' als differentiator. Marktkennis-rapporten per gemeente trekken zoekers aan die later verkopen.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:215,brand:"BNPPRE",name:"The Art of Real Estate",sector:"Vastgoed / B2B",kanaal:"LinkedIn + Events + Print",trigger:"Authority + Exclusiviteit",format:"Luxury B2B positioning",mechanism:"BNP Paribas Real Estate positioneert zich als partner voor complexe commercieel vastgoed-transacties via thought leadership rapporten en exclusieve marktanalyses. Kennis als verkooptool.",target:"B2B / Investeerders + Bedrijven",feasibility:"🔶"},
+  {n:216,brand:"STAM Gent",name:"Stadsgeschiedenis als Beleving",sector:"Cultuur / Museum",kanaal:"Social + PR + Edu",trigger:"Trots + Curiositeit",format:"Heritage storytelling",mechanism:"STAM maakt Gentse stadsgeschiedenis toegankelijk via interactieve ervaringen. Locals herontdekken hun stad. Museum als tool voor stadstrots die toeristen en scholieren aantrekt.",target:"B2C / Lokaal + Toeristen",feasibility:"✅"},
+  {n:217,brand:"Brico",name:"Zomerproject Campagne",sector:"Retail / DIY",kanaal:"TV + Folder + Social",trigger:"Seizoen + FOMO",format:"Seizoensgebonden campagne",mechanism:"Brico koppelt elke zomer aan een groot doe-het-zelf-project. Inspiratie-content vooraf, producten in de winkel, resultaten op social. Retailcyclus gestuurd door seizoensritueel.",target:"B2C / 30-55",feasibility:"✅"},
+  {n:218,brand:"Leroy Merlin",name:"Mijn Thuis Mijn Project",sector:"Retail / Interieur",kanaal:"YouTube + Social + In-store",trigger:"Identiteit + Trots",format:"Projectbegeleiding campagne",mechanism:"Leroy Merlin begeleidt klanten stap voor stap door hun renovatieproject via video-tutorials en in-store workshops. Expertise als service die loyaliteit opbouwt. Klant leert, winkel verkoopt.",target:"B2C / 28-55",feasibility:"✅"},
+  {n:219,brand:"Velux",name:"Daglicht Transformatie",sector:"B2B / Bouw",kanaal:"Video + Trade media + Social",trigger:"Emotie + Bewijs",format:"Before/after campagne",mechanism:"Velux toont spectaculaire before/after transformaties van donkere ruimtes die licht krijgen via hun dakramen. Emotionele impact van daglicht als verkoopargument. Architecten én consumenten aangesproken.",target:"B2B / Architecten + B2C",feasibility:"✅"},
+  {n:220,brand:"Renson",name:"Healthy Living",sector:"B2B / Bouw",kanaal:"LinkedIn + Trade events + Video",trigger:"Gezondheid + Authority",format:"Thought leadership B2B",mechanism:"Renson positioneert ventilatie als gezondheidsproduct, niet als technisch systeem. Luchtkwaliteit-data en wetenschappelijk onderzoek als campagne-motor. Architecten en bouwheren overtuigd via gezondheidslogica.",target:"B2B / Architecten + Bouwheren",feasibility:"✅"},
+
+  // 221-230: TELECOM & TECH
+  {n:221,brand:"Proximus",name:"Together We Can",sector:"Telecom",kanaal:"TV + Social + Sponsoring",trigger:"Belonging + Empowerment",format:"Maatschappelijke campagne",mechanism:"Proximus koppelt zijn netwerk aan de verbinding tussen mensen. Sponsoring van cultuur en sport als bewijs. Telecom als enabler van menselijke verbinding, niet enkel van data.",target:"B2C + B2B breed",feasibility:"✅"},
+  {n:222,brand:"Base/Telenet",name:"Zonder Gedoe",sector:"Telecom",kanaal:"TV + Radio + Social",trigger:"Frustratie + Gemak",format:"Anti-jargon campagne",mechanism:"Telenet positioneert Base als de simpele, eerlijke telecomkeuze zonder verborgen kosten of verwarrende bundels. Frustratie met de sector als aanknopingspunt. Eenvoud als luxe.",target:"B2C / 20-45",feasibility:"✅"},
+  {n:223,brand:"Orange Belgium",name:"Open",sector:"Telecom",kanaal:"OOH + TV + Social",trigger:"Vrijheid + Identiteit",format:"Positioneringscampagne",mechanism:"Orange positioneert zich rond openheid: open netwerk, open tarieven, open communicatie. Contrast met gesloten, complexe concurrenten. Telecom als vrijheidsbelofte.",target:"B2C breed",feasibility:"✅"},
+  {n:224,brand:"Dropsolid",name:"Open Source Drupal",sector:"Tech / B2B",kanaal:"LinkedIn + Events + Content",trigger:"Waarden + Community",format:"Open source thought leadership",mechanism:"Dropsolid bouwt autoriteit door actief bij te dragen aan de open source Drupal-community. Kennis delen als acquisitie-strategie. B2B-klanten kiezen Dropsolid omdat ze de experts kennen.",target:"B2B / IT + Marketing",feasibility:"✅"},
+  {n:225,brand:"Teamleader",name:"Stop Wasting Time",sector:"SaaS / B2B",kanaal:"LinkedIn + Google + Events",trigger:"Frustratie + Tijdsbesparing",format:"Pain-point campagne",mechanism:"Teamleader toont exact hoeveel uren KMO-zaakvoerders verliezen aan administratie. Data als bewijs, oplossing als CTA. 'Jij verliest X uur per week' is persoonlijker dan een feature-lijst.",target:"B2B / KMO",feasibility:"✅"},
+  {n:226,brand:"Showpad",name:"The Sales Enablement Category",sector:"SaaS / B2B",kanaal:"LinkedIn + Events + Content",trigger:"Authority + Educatie",format:"Categorie-creatie campagne",mechanism:"Showpad hielp de categorie 'sales enablement' definiëren vóór ze de marktleider werden. Wie de categorie benoemt, bezit ze. Thought leadership rapport als categorie-autoriteitsopbouw.",target:"B2B / Sales + Marketing",feasibility:"🔶"},
+  {n:227,brand:"Clearbit",name:"Data as Demo",sector:"SaaS / B2B",kanaal:"Website + LinkedIn",trigger:"Verrassing + Bewijs",format:"Product-led campagne",mechanism:"Clearbit toonde bezoekers van hun website hun eigen bedrijfsdata live. 'Wij weten al wie je bent' als verkoopbewijs. Product-demo ingebakken in de eerste website-ervaring.",target:"B2B / Marketing + Sales",feasibility:"🔶"},
+  {n:228,brand:"Twilio",name:"Ask Your Developer",sector:"SaaS / B2B",kanaal:"Print + OOH + Online",trigger:"Authority + Humor",format:"Developer-first campagne",mechanism:"Twilio adverteerde niet aan CEO's maar aan developers. 'Ask your developer' als tagline die de machtsbalans omkeert. Developers worden intern ambassadeurs die het product pushen naar beslissers.",target:"B2B / Developers",feasibility:"🔶"},
+  {n:229,brand:"Liantis",name:"Meer Tijd voor Ondernemen",sector:"B2B / HR diensten",kanaal:"LinkedIn + Google + Direct",trigger:"Tijdsbesparing + Ontzorging",format:"Pain-point campagne",mechanism:"Liantis richt zich op zelfstandigen en KMO's die verstrikt raken in sociaal-juridische administratie. 'Wij doen het, jij onderneemt' als kernbelofte. Ontzorging als premium-dienst.",target:"B2B / Zelfstandigen + KMO",feasibility:"✅"},
+  {n:230,brand:"Isabel Group",name:"Financieel Ecosysteem",sector:"Fintech / B2B",kanaal:"LinkedIn + Events + Content",trigger:"Vertrouwen + Efficiëntie",format:"B2B ecosysteem campagne",mechanism:"Isabel positioneert zijn betaalplatform als het zenuwcentrum van Belgische bedrijfsfinanciën. Integraties met alle banken als differentiator. CFO's aangesproken via tijdsbesparing-argumenten.",target:"B2B / Finance + CFO",feasibility:"🔶"},
+
+  // 231-240: LUXE & PREMIUM
+  {n:231,brand:"Hermès",name:"The Waiting List",sector:"Luxe / Fashion",kanaal:"PR + Retail + Word of mouth",trigger:"Exclusiviteit + Schaarste",format:"Anti-reclame model",mechanism:"Hermès maakt nagenoeg geen reclame. De Birkin-wachtlijst IS het businessmodel én de campagne. Schaarste gecreëerd door vraag te onderhouden zonder aanbod te verhogen. Verlangen als marketingstrategie.",target:"B2C / HNWI",feasibility:"❌"},
+  {n:232,brand:"Rolex",name:"Perpetual Excellence",sector:"Luxe / Watch",kanaal:"Print + Sponsoring",trigger:"Exclusiviteit + Erfenis",format:"Heritage campagne",mechanism:"Rolex adverteert in dezelfde exclusieve tijdschriften al decennialang. Consistentie IS het luxesignaal. Exploratie, sport en precisie als drie pijlers. Horloges als symbool van levensprestaties.",target:"B2C / 40-70 (HNWI)",feasibility:"❌"},
+  {n:233,brand:"Moët & Chandon",name:"Be Fabulous",sector:"Luxe / Champagne",kanaal:"Events + Social + PR",trigger:"Celebratie + Exclusiviteit",format:"Lifestyle event campagne",mechanism:"Moët koppelt zijn product aan de meest iconische momenten: Cannes, Fashion Week, sportzeges. Aanwezigheid op premium events IS de campagne. Champagne als shorthand voor succes.",target:"B2C / 30-65",feasibility:"🔶"},
+  {n:234,brand:"Louis Vuitton",name:"Core Values Campaign",sector:"Luxe / Fashion",kanaal:"Print + OOH",trigger:"Identiteit + Erfenis",format:"Celebrity testimonial campagne",mechanism:"LV fotografeert iconen (Mikhail Gorbachev in een LV-auto, Ali & Pelé schaken) in herkenbare settings. Geen product-push, enkel associatie met gedenkwaardige levens. Heritage als campagnekern.",target:"B2C / 35-65 (aspirational)",feasibility:"❌"},
+  {n:235,brand:"Neuhaus",name:"Belgian Chocolate Prestige",sector:"Luxe / FMCG",kanaal:"Retail + PR + B2B gifting",trigger:"Trots + Herkomst",format:"Heritage + gifting campagne",mechanism:"Neuhaus als uitvinder van de praline positioneert herkomst als het sterkste verkoopargument. 'Origineel Belgisch' in een markt vol imitatoren. B2B gifting als stille groeistrategie.",target:"B2C + B2B / Gifting",feasibility:"✅"},
+  {n:236,brand:"Spa Reine",name:"Pure Water, Pure Belgium",sector:"FMCG / Luxe water",kanaal:"OOH + Retail + Events",trigger:"Herkomst + Zuiverheid",format:"Origin branding",mechanism:"Spa positioneert zijn Ardens bronwater als Belgisch premium. Aanwezigheid bij toprestaurants en events als kwaliteitsbewijs. 'Koningin der waters' als historische claim die vandaag nog werkt.",target:"B2C / 25-60",feasibility:"✅"},
+  {n:237,brand:"Delvaux",name:"The Most Belgian Luxury Brand",sector:"Luxe / Fashion",kanaal:"PR + Editorial + Events",trigger:"Trots + Exclusiviteit",format:"Heritage luxury campagne",mechanism:"Delvaux, ouder dan Hermès, positioneert Belgische luxe als alternatief voor Frans. Craftmanship in Brussel als uniek verhaal. Internationale modepers aangesproken via authenticiteit en leeftijd van het merk.",target:"B2C / 35-65 (HNWI)",feasibility:"🔶"},
+  {n:238,brand:"Graanmarkt 13",name:"Curated Lifestyle Concept",sector:"Retail / Luxe / Horeca",kanaal:"PR + Social + Editorial",trigger:"Exclusiviteit + Curation",format:"Concept store campagne",mechanism:"Graanmarkt 13 combineert restaurant, winkel en appartement in één Antwerps pand. Het concept IS het merk. Internationale pers schrijft erover zonder dat er budget aan gespendeerd wordt.",target:"B2C / 35-60",feasibility:"🔶"},
+  {n:239,brand:"The Jane Antwerpen",name:"Decadent Dining PR",sector:"Horeca / Luxe",kanaal:"PR + Social + Editorial",trigger:"Exclusiviteit + Spectacle",format:"PR-gedreven restaurant",mechanism:"Sergio Herman's restaurant in een voormalige kapel genereert internationale media-aandacht via design en kookkunst. Elke review is een campagne. Wachtlijst als bewijs van succes en désirabilité.",target:"B2C / 35-65",feasibility:"🔶"},
+  {n:240,brand:"Rivièra Maison",name:"Home Styling Community",sector:"Retail / Interieur",kanaal:"Instagram + In-store + Catalog",trigger:"Identiteit + Inspiratie",format:"Lifestyle community campagne",mechanism:"Rivièra Maison klanten delen hun gestileerde interieurs op Instagram. Het merk repost de mooiste. Aspiratie gecreëerd door echte huizen, niet showrooms. Community van huisstylisten als saleskanaal.",target:"B2C / 30-55",feasibility:"✅"},
+
+  // 241-250: MEDIA, PUBLISHING & CONTENT
+  {n:241,brand:"The Guardian",name:"Open Journalism",sector:"Media",kanaal:"Online + Social + PR",trigger:"Waarden + Vertrouwen",format:"Business model als campagne",mechanism:"The Guardian vraagt lezers vrijwillig bij te dragen in plaats van een betaalmuur. Radicale transparantie over redactionele onafhankelijkheid als verkoopargument. 1M+ betalende supporters.",target:"B2C / 28-55",feasibility:"🔶"},
+  {n:242,brand:"De Morgen",name:"Omdat Nieuws Telt",sector:"Media / Belgisch",kanaal:"Social + PR + OOH",trigger:"Waarden + Vertrouwen",format:"Journalistiek als merk",mechanism:"De Morgen positioneert kwaliteitsjournalistiek als maatschappelijke noodzaak. Verhalen achter de verhalen als campagne. Lezers overtuigd dat ze investeren in democratie, niet in een krant.",target:"B2C / 28-55",feasibility:"✅"},
+  {n:243,brand:"Knack",name:"Onafhankelijk Denken",sector:"Media / Belgisch",kanaal:"Print + Digital + Social",trigger:"Identiteit + Authority",format:"Thought leadership media brand",mechanism:"Knack bouwt autoriteit via diepgaande analyses die andere media oppikken. 'Wij gaan verder dan de headline' als differentiator. Abonnees kiezen Knack voor het denkniveau, niet voor het nieuws.",target:"B2C / 35-65",feasibility:"✅"},
+  {n:244,brand:"Humo",name:"Humor als Identiteit",sector:"Media / Belgisch",kanaal:"Print + Social + Podcast",trigger:"Humor + Identiteit",format:"Toon als merk",mechanism:"Humo's scherpe, satirische toon IS het merk. 40 jaar consistente stem. Lezers identificeren zich met de toon. Nieuwe formats (podcast, video) werken omdat de stem hetzelfde blijft.",target:"B2C / 25-55",feasibility:"✅"},
+  {n:245,brand:"Substack",name:"Paid Newsletter Revolution",sector:"Media / Platform",kanaal:"PR + Social + Word of mouth",trigger:"Autonomie + Identiteit",format:"Creator empowerment campagne",mechanism:"Substack positioneert zich als bevrijder van journalisten en schrijvers van redacties. 'Schrijf direct voor je publiek' als revolutionair idee. Schrijvers worden het product dat Substack verkoopt.",target:"B2C / Creators + Lezers",feasibility:"🔶"},
+  {n:246,brand:"Roularta Media",name:"Vakblad Authority",sector:"Media / B2B",kanaal:"Print + Events + LinkedIn",trigger:"Authority + Educatie",format:"B2B media authority",mechanism:"Roularta's vakbladen (Trends, Knack, Sport/Voetbalmagazine) bouwen sectorautoriteit. Adverteerders kopen niet een pagina maar associatie met redactionele geloofwaardigheid.",target:"B2B / Adverteerders",feasibility:"✅"},
+  {n:247,brand:"Binge",name:"Vlaamse Streaming Identiteit",sector:"Media / Entertainment",kanaal:"Social + TV + PR",trigger:"Trots + Belonging",format:"Local content campagne",mechanism:"VRT's streamingplatform Binge positioneert Vlaams drama als kwalitatief alternatief voor Amerikaans aanbod. Lokale verhalen als sterkste troef in een markt vol internationale concurrenten.",target:"B2C / 25-55",feasibility:"✅"},
+  {n:248,brand:"Podcast Luister",name:"Audio Storytelling Campagne",sector:"Media / Audio",kanaal:"Social + Spotify + PR",trigger:"Intimiteit + Identiteit",format:"Medium-bewustzijn campagne",mechanism:"Campagne die de intimiteit van audio als medium zelf verkoopt. Podcast-hosts worden celebrities. Luisteraars zijn trouwe fans, geen passieve consumenten. Audio als het persoonlijkste medium.",target:"B2C / 20-45",feasibility:"✅"},
+  {n:249,brand:"Studio Brussel",name:"Muziek Verbindt",sector:"Media / Radio",kanaal:"Radio + Social + Events",trigger:"Belonging + Muziek",format:"Community radio campagne",mechanism:"Studio Brussel bouwt een gemeenschap rondom muziekontdekking. Luisteraars zijn de curatoren. Live events versterken de on-air community. Merk = muzikale identiteit van de luisteraar.",target:"B2C / 18-45",feasibility:"✅"},
+  {n:250,brand:"Ketnet",name:"Kids Participatie Campagne",sector:"Media / Onderwijs",kanaal:"TV + App + Social",trigger:"Empowerment + Belonging",format:"Participatieve media campagne",mechanism:"Ketnet betrekt kinderen actief bij de programma's via stemmingen, videobijdragen en challenges. Kinderen zijn co-creators, niet enkel kijkers. Loyaliteit gebouwd via eigenaarschapsgevoel.",target:"B2C / Kinderen + Ouders",feasibility:"✅"},
+
+  // 251-260: SEIZOENSGEBONDEN & OCCASIONS
+  {n:251,brand:"Bpost Kerst",name:"Schrijf een Brief",sector:"Logistiek / Overheid",kanaal:"TV + Social + In-store",trigger:"Nostalgie + Emotie",format:"Ritueel heropleving campagne",mechanism:"Bpost heropleeft het schrijven van kerstbrieven als campagne voor postzegels en kaarten. Emotionele waarde van handgeschreven post als tegenwicht voor digitale communicatie.",target:"B2C breed",feasibility:"✅"},
+  {n:252,brand:"Smartphoto",name:"Zet Je Foto's Op Papier",sector:"Retail / E-com",kanaal:"Social + Email + Google",trigger:"Nostalgie + Schuldgevoel",format:"Occasion-driven campagne",mechanism:"Smartphoto activeert mensen die duizenden foto's op hun telefoon hebben maar nooit afdrukken. 'Je dochter van 5 jaar verdient meer dan een scherm' als emotionele trigger. Gelegenheden als aankooptrigger.",target:"B2C / 28-50",feasibility:"✅"},
+  {n:253,brand:"Intratuin",name:"Lente Start Hier",sector:"Retail / Tuin",trigger:"Seizoen + FOMO",kanaal:"TV + Radio + Social",format:"Seizoensopening campagne",mechanism:"Intratuin bouwt elk jaar hype rond de opening van het tuinseizoen. 'De lente begint bij Intratuin' als jaarlijks ritueel. Eerste bezoek van het seizoen is een event, geen winkelbezoek.",target:"B2C / 30-60",feasibility:"✅"},
+  {n:254,brand:"Hallmark",name:"When You Care Enough",sector:"Retail / FMCG",kanaal:"TV + Retail",trigger:"Emotie + Schuldgevoel",format:"Occasion marketing",mechanism:"Hallmark heeft het begrip 'kaartensturen' cultureel gecreëerd. 'When you care enough to send the very best' als samenleving-brede norm. Gelegenheden gecreëerd die producten vereisen.",target:"B2C breed",feasibility:"🔶"},
+  {n:255,brand:"Delhaize",name:"Feestdagen Campagne",sector:"Retail",kanaal:"TV + Folder + Social",trigger:"Warmte + Nostalgie",format:"Emotionele seizoenskampagne",mechanism:"Delhaize koppelt zijn feestdagen-aanbod aan familiegeluk en gezelligheid. Niet de producten maar het moment van samen eten als campagne-kern. Warme beelden die herkenning oproepen.",target:"B2C breed",feasibility:"✅"},
+  {n:256,brand:"Coca-Cola",name:"Kerstman Rood",sector:"FMCG",kanaal:"TV + OOH + Retail",trigger:"Nostalgie + Warmte",format:"Cultural ownership campagne",mechanism:"Coca-Cola maakte de Kerstman rood in de jaren '30 en bezit sindsdien dat visuele territorium. Kerstcampagne als jaarlijks cultureel ritueel. Merk verweven met seizoensbeleving.",target:"B2C breed",feasibility:"🔶"},
+  {n:257,brand:"Aldi Valentijn",name:"Luxe voor Weinig",sector:"Retail",kanaal:"Folder + Social + In-store",trigger:"Prijs + Romantiek",format:"Gelegenheids-price campagne",mechanism:"Aldi toont dat je een romantisch diner kan samenstellen voor een fractie van de restaurantprijs. Humor over Valentijn-commercie gecombineerd met eerlijke prijsclaim.",target:"B2C breed",feasibility:"✅"},
+  {n:258,brand:"Fnac",name:"Back to School Season",sector:"Retail / Tech",kanaal:"TV + Social + Email",trigger:"FOMO + Praktisch",format:"Seizoensgebonden retailcampagne",mechanism:"Fnac domineert de back-to-school periode via vroege communicatie over laptop- en gadgetaanbod. Ouders aangemoedigd vroeg te kopen via voordeelcommunicatie. Seizoen als verkoopvenster.",target:"B2C / Ouders + Studenten",feasibility:"✅"},
+  {n:259,brand:"Torfs",name:"Moederdag Campagne",sector:"Retail",kanaal:"Social + Email + In-store",trigger:"Emotie + Schuldgevoel",format:"Occasion marketing",mechanism:"Torfs positioneert schoenen als het perfecte moederdagcadeau via emotionele campagnes met echte moeder-kind-verhalen. UGC van klanten versterkt authenticiteit.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:260,brand:"ING",name:"Doe Meer Met Je Geld",sector:"Finance / Seizoen",kanaal:"TV + Social + App",trigger:"Loss aversion + Aspiratie",format:"Jaarplan campagne",mechanism:"ING lanceert elk januari een campagne om mensen hun financiële doelen te stellen. App-functionaliteiten als campagne-motor. Nieuwjaar als trigger voor financieel gedragsverandering.",target:"B2C / 25-55",feasibility:"✅"},
+
+  // 261-270: RETAIL VERDIEPT & PRICING PSYCHOLOGY
+  {n:261,brand:"Primark",name:"Amazing Fashion Amazing Prices",sector:"Retail / Fashion",kanaal:"OOH + Social + Word of mouth",trigger:"Prijs + FOMO",format:"Prijs-as-campagne",mechanism:"Primark besteedt nagenoeg niets aan reclame. Extreme lage prijzen zijn de enige boodschap. Mensen vertellen vrienden over hun aankopen. Mond-aan-mond als enige campagnekanaal.",target:"B2C / 15-40",feasibility:"🔶"},
+  {n:262,brand:"Action",name:"Wat Ga Jij Ontdekken?",sector:"Retail",kanaal:"Folder + Social + Radio",trigger:"Curiositeit + Prijs",format:"Ontdekkings-retail campagne",mechanism:"Action verkoopt de ervaring van onverwachte vondsten doen aan extreme lage prijzen. Klanten weten nooit wat er zal liggen. Schatzoekerservaring als retail-mechanic.",target:"B2C breed",feasibility:"✅"},
+  {n:263,brand:"Mediamarkt",name:"Ik Ben Toch Niet Gek?",sector:"Retail / Electronics",kanaal:"TV + Radio + Social",trigger:"Prijs + Humor",format:"Prijsclaim campagne",mechanism:"MediaMarkt's directe, arrogante toon ('Ik ben toch niet gek?') was jarenlang hun sterkste differentiator. Prijs als énige boodschap, brutaal herhaald. Consistentie van toon als merk-DNA.",target:"B2C breed",feasibility:"✅"},
+  {n:264,brand:"Ikea",name:"Tiny Home Campaign",sector:"Retail / Interieur",kanaal:"Social + Video + PR",trigger:"Identiteit + Oplossing",format:"Probleemoplossend storytelling",mechanism:"IKEA toont hoe mensen in kleine stedelijke appartementen toch mooi en functioneel kunnen wonen via slimme IKEA-oplossingen. Echte klanten in echte kleine woningen als inspiratie.",target:"B2C / 22-40",feasibility:"✅"},
+  {n:265,brand:"Decathlon",name:"Give Back Programme",sector:"Retail / Sport",kanaal:"In-store + Social + App",trigger:"Waarden + Circulair",format:"Circulaire retail campagne",mechanism:"Decathlon koopt tweedehands sportmateriaal terug en verkoopt het goedkoper. Duurzaamheid en prijs gecombineerd. Klanten keren terug bij upgrade om oud materiaal te verkopen.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:266,brand:"Fnac Darty",name:"Membership Loyalty",sector:"Retail / E-com",kanaal:"App + Email + In-store",trigger:"Loss aversion + Belonging",format:"Membership programma",mechanism:"Fnac-abonnement geeft exclusieve voordelen, gratis reparaties en early access. Jaarlijkse kost creëert commitment. Leden kopen meer om hun abonnement te 'verdienen'. Sunk cost als loyaliteitsmechanisme.",target:"B2C / 25-55",feasibility:"✅"},
+  {n:267,brand:"Jumbo",name:"Prijswinnaar Elke Week",sector:"Retail / Food",kanaal:"Folder + Social + TV",trigger:"Gamification + Prijs",format:"Wekelijkse promotie als event",mechanism:"Jumbo's wekelijkse 'prijswinnaar' product creëert een ritme van verwachting. Klanten komen elke week terug om de nieuwe aanbieding te ontdekken. Promotie als inhoud, niet als korting.",target:"B2C breed",feasibility:"✅"},
+  {n:268,brand:"Uniqlo",name:"LifeWear Philosophy",sector:"Fashion / Retail",kanaal:"OOH + Social + Retail",trigger:"Identiteit + Eenvoud",format:"Filosofie als campagne",mechanism:"Uniqlo verkoopt geen trends maar tijdloze, functionele kleding. 'LifeWear' als filosofie die anti-fast fashion-kopers aanspreekt. Eenvoud als luxe-positionering in middensegment.",target:"B2C / 25-50",feasibility:"✅"},
+  {n:269,brand:"Costco",name:"Members Only",sector:"Retail",kanaal:"Word of mouth + Direct",trigger:"Exclusiviteit + Waarde",format:"Membership-only model",mechanism:"Costco groeit via mond-aan-mond van leden die trots zijn op hun lidmaatschap. 'Je moet lid zijn' creëert exclusiviteitsgevoel bij een discountretailer. Lidmaatschapsgeld als loyaliteitsanker.",target:"B2C / 30-60",feasibility:"🔶"},
+  {n:270,brand:"Wandelgek",name:"Lokale Outdoor Retailer",sector:"Retail / Sport / KMO",kanaal:"Social + Events + Community",trigger:"Belonging + Expertise",format:"Community retail campagne",mechanism:"Kleine outdoor-retailer bouwt een wandelcommunity rondom zijn zaak. Gratis wandelevents, lokale gidsen en expert-advies als differentiator vs. grote ketens. Gemeenschap koopt bij gemeenschap.",target:"B2C / 30-65",feasibility:"✅"},
+
+  // 271-280: NON-PROFIT & SOCIAL IMPACT
+  {n:271,brand:"Kom op Tegen Kanker",name:"Kom op Tegen Kanker Campagne",sector:"NGO / Belgisch",kanaal:"Radio + TV + Events",trigger:"Belonging + Emotie",format:"Community fundraising",mechanism:"Jaarlijkse estafetteloop als centrale actie. Deelnemers zamelen geld in via hun netwerk. Persoonlijke verhalen als campagne-motor. Collectieve actie die individuen verbindt via gedeeld doel.",target:"B2C breed",feasibility:"✅"},
+  {n:272,brand:"Rode Kruis Vlaanderen",name:"Bloed Geven Campagne",sector:"NGO / Gezondheid",kanaal:"Social + OOH + Direct",trigger:"Sociale norm + Urgentie",format:"Sociale norm campagne",mechanism:"'Jouw type bloed is schaars' als gepersonaliseerde boodschap. Data gebruikt om urgentie te creëren per bloedgroep. Schaarste gecombineerd met sociale verantwoordelijkheid.",target:"B2C / 18-65",feasibility:"✅"},
+  {n:273,brand:"Child Focus",name:"Verdwenen Kinderen",sector:"NGO",kanaal:"PR + Social + Retail",trigger:"Empathy + Urgentie",format:"Awareness campagne",mechanism:"Child Focus plaatst foto's van vermiste kinderen op melkpakken en supermarktschermen. Dagelijkse contactmomenten omgezet in bewustzijnskansen. Retail als campagnepartner.",target:"B2C breed",feasibility:"✅"},
+  {n:274,brand:"Oxfam",name:"Second Hand September",sector:"NGO / Duurzaamheid",kanaal:"Social + PR + Retail",trigger:"Waarden + Identiteit",format:"Gedragsverandering campagne",mechanism:"Oxfam vraagt mensen een maand lang geen nieuwe kleding te kopen en tweedehands te kiezen. Maand-challenge als community-bindmiddel. Deelnemers inspireren via social hun netwerk.",target:"B2C / 20-45",feasibility:"✅"},
+  {n:275,brand:"WWF België",name:"Earth Hour",sector:"NGO / Milieu",kanaal:"PR + Social + Events",trigger:"Belonging + Visueel spektakel",mechanism:"Één uur alle lichten uit wereldwijd. Iconische gebouwen doen mee. Massaparticipatie via simpele actie. Visueel spektakel genereert media-aandacht. Collectieve ritueel als bewustzijnscampagne.",format:"Global moment campagne",target:"B2C breed",feasibility:"✅"},
+  {n:276,brand:"Muziekcentrum Vlaanderen",name:"Muziek op School",sector:"Cultuur / NGO",kanaal:"Direct + Social + Events",trigger:"Belonging + Toekomst",format:"Educatieve campagne",mechanism:"Campagne die ouders en scholen overtuigt van de waarde van muziekonderwijs via wetenschappelijke onderbouwing en echte verhalen van kinderen. Muziek als cognitief en sociaal ontwikkelingstool.",target:"B2C / Ouders + B2B Scholen",feasibility:"✅"},
+  {n:277,brand:"Amnesty International",name:"Write for Rights",sector:"NGO",kanaal:"Social + Email + Events",trigger:"Empowerment + Belonging",format:"Participatieve actie campagne",mechanism:"Amnesty vraagt mensen brieven te schrijven voor gevangen activisten. Simpele actie met bewezen resultaten. Briefschrijven als ritueel dat verbinding creëert tussen activist en gevangene.",target:"B2C / 20-60",feasibility:"✅"},
+  {n:278,brand:"Artsen Zonder Grenzen",name:"Noodhulp Campagne",sector:"NGO",kanaal:"TV + Social + Direct mail",trigger:"Urgentie + Empathy",format:"Noodhulp-activatie campagne",mechanism:"MSF combineert beeldmateriaal van crises met concrete actie-CTA's. 'Voor elke €5 kan een kind worden behandeld' als impactmeting. Donateurs zien direct wat hun geld doet.",target:"B2C / 30-70",feasibility:"✅"},
+  {n:279,brand:"Rode Neuzen Dag",name:"Rode Neuzen Dag",sector:"NGO / Media / Belgisch",kanaal:"TV + Radio + Social + Retail",trigger:"Belonging + Humor + Emotie",format:"Gecombineerde media-campagne",mechanism:"VTM en Qmusic combineren humor (rode neuzen) met serieux (mentale gezondheid jongeren). Retail verkoopt neuzen, opbrengst gaat naar projecten. Mediabrede actie die heel Vlaanderen betrekt.",target:"B2C breed",feasibility:"✅"},
+  {n:280,brand:"Plan International",name:"Because I am a Girl",sector:"NGO",kanaal:"Social + PR + Events",trigger:"Identiteit + Verontwaardiging",format:"Activism campagne",mechanism:"Mondiale campagne voor meisjesrechten die individuen vraagt hun naam te veranderen op social media. Identiteitsoverdracht als activisme-mechanic. Massale deelname via simpele digitale actie.",target:"B2C / 20-45",feasibility:"🔶"},
+
+  // 281-290: BELGISCHE KMO DEEP-CUTS
+  {n:281,brand:"Ter Beke / Plat du Chef",name:"Vers uit de Fabriek",sector:"Food / B2B",kanaal:"Trade media + LinkedIn + Events",trigger:"Herkomst + Vertrouwen",format:"B2B herkomst campagne",mechanism:"Ter Beke toont zijn productieproces aan retailers en foodservice-klanten. Transparantie over productie als kwaliteitsbewijs in B2B. 'Vers uit de fabriek' als differentiator vs. import.",target:"B2B / Retail + Foodservice",feasibility:"✅"},
+  {n:282,brand:"Lotus Bakeries",name:"Speculoos Wereldverovering",sector:"FMCG / Export",kanaal:"PR + Social + Retail internationaal",trigger:"Trots + Nieuwsgierigheid",format:"Belgian export campagne",mechanism:"Lotus maakte van speculoos een wereldwijd fenomeen via vliegtuigmaaltijden als eerste contactpunt. 'Hoe een Belgisch koekje de wereld veroverde' als verhaal dat internationaal en lokaal werkt.",target:"B2C breed",feasibility:"✅"},
+  {n:283,brand:"Jules Destrooper",name:"Royal Belgian Biscuits",sector:"FMCG / Luxe",kanaal:"Retail + Gifting + Export",trigger:"Herkomst + Exclusiviteit",format:"Royal endorsement campagne",mechanism:"Jules Destrooper gebruikt zijn koninklijke hofleveranciersstatuut als premium-signaal. 'Hofleverancier van het Belgisch Koningshuis' als kwaliteitslabel. Heritage als exportargument.",target:"B2C / Gifting + Toerisme",feasibility:"✅"},
+  {n:284,brand:"Umicore",name:"Materials for a Better Life",sector:"B2B / Industrie",kanaal:"LinkedIn + PR + Events",trigger:"Waarden + Purpose",format:"Corporate purpose campagne",mechanism:"Umicore positioneert materiaalrecycling als essentieel voor de energietransitie. B2B-merk dat zichzelf als planetaire probleemoplosser positioneert. Investeerders én klanten aangesproken.",target:"B2B / Investeerders + Industrie",feasibility:"🔶"},
+  {n:285,brand:"Beaulieu International",name:"Flooring the World",sector:"B2B / Industrie",kanaal:"Trade events + LinkedIn + Showrooms",trigger:"Trots + Vakmanschap",format:"B2B trade campagne",mechanism:"Beaulieu toont zijn vloerbedekkingen in iconische internationale projecten. 'Onze vloeren liggen overal' als bewijs van schaal en kwaliteit. Referentieprojecten als sales-tool.",target:"B2B / Architecten + Projectontwikkelaars",feasibility:"✅"},
+  {n:286,brand:"Ghent Butcher",name:"Lokale Slager 2.0",sector:"Food / KMO",kanaal:"Social + In-store + WhatsApp",trigger:"Herkomst + Gemeenschap",format:"Lokale community campagne",mechanism:"Kleine slager bouwt een loyale klantengemeenschap via Instagram-stories van dagelijkse leveringen en WhatsApp-bestellingen. Transparantie over herkomst en ambacht als USP vs. supermarkt.",target:"B2C / Lokaal",feasibility:"✅"},
+  {n:287,brand:"Bakkerij Braeckman",name:"Koekebrood Nostalgie",sector:"Food / KMO",kanaal:"Social + Local PR",trigger:"Nostalgie + Herkomst",format:"Heritage KMO campagne",mechanism:"Oost-Vlaamse bakkerij maakt zijn streekproduct koekebrood tot identiteits-symbool. Verhaal van generaties ambacht als onderscheidend element. Lokale pers en social creëren regionale trots.",target:"B2C / Lokaal + Toeristen",feasibility:"✅"},
+  {n:288,brand:"Kortrijk Xpo",name:"B2B Event Platform",sector:"Events / B2B",kanaal:"LinkedIn + Trade media + Direct",trigger:"Authority + Belonging",format:"B2B community events",mechanism:"Kortrijk Xpo positioneert zich als het West-Vlaamse businessplatform via vakbeurzen. Deelnemers komen voor leads, blijven voor netwerk. Beurs als jaarlijks zakelijk ritueel.",target:"B2B / West-Vlaamse bedrijven",feasibility:"✅"},
+  {n:289,brand:"De Pypere Bloemisten",name:"Lokale Florist Brand",sector:"Retail / KMO",kanaal:"Social + Google + WhatsApp",trigger:"Emotie + Nabijheid",format:"Lokale expert campagne",mechanism:"Kleine bloemist bouwt online zichtbaarheid via dagelijkse Instagram-posts van arrangementen met uitleg over seizoensbloemen. Expertise zichtbaar gemaakt. Google Reviews als sales-tool.",target:"B2C / Lokaal",feasibility:"✅"},
+  {n:290,brand:"Stad Kortrijk",name:"Slimste Stad Campagne",sector:"Overheid / Stadsmarketing",kanaal:"Social + PR + Events",trigger:"Trots + Innovatie",format:"Stadsidentiteit campagne",mechanism:"Kortrijk positioneert zich als proeftuin voor slimme stedelijke technologie. Innovatieve projecten als verhaalmateriaal. Stadsidentiteit opgebouwd via een reputatie als experimenteerplatform.",target:"B2C + B2B / Lokaal + Nationaal",feasibility:"✅"},
+
+  // 291-300: VIRAAL MECHANICS & GROWTH HACKING
+  {n:291,brand:"Hotmail",name:"PS: I Love You",sector:"Tech",kanaal:"Email / Product",trigger:"Social proof + Curiositeit",format:"Virale signature campagne",mechanism:"Elke uitgaande Hotmail e-mail eindigde met 'PS: I Love You. Get your free email at Hotmail.' Eerste viraal product-marketing ooit. 12M gebruikers in 18 maanden. Elke gebruiker is een billboard.",target:"B2C breed",feasibility:"✅"},
+  {n:292,brand:"ALS Association",name:"Ice Bucket Challenge",sector:"NGO / Health",kanaal:"Social + Video",trigger:"Sociale norm + FOMO + Humor",format:"Virale challenge campagne",mechanism:"Vrienden nomineren vrienden om een emmer ijswater over zichzelf te gooien of te doneren. Virale ketting via nominatie-mechanic. $115M opgehaald in 8 weken. Participatie laagdrempelig, impact groot.",target:"B2C breed",feasibility:"✅"},
+  {n:293,brand:"Candy Crush",name:"Social Graph Virality",sector:"Gaming",kanaal:"Facebook + App",trigger:"FOMO + Sociale norm",format:"Social graph viral mechanic",mechanism:"Candy Crush vroeg je om levens van Facebook-vrienden. Je sociale netwerk werd het gameboardspel. Vrienden sturen notificaties, vrienden installeren het spel. Netwerk-effect als groeimechanisme.",target:"B2C breed",feasibility:"❌"},
+  {n:294,brand:"Slack",name:"Freemium Viraliteit",sector:"SaaS / B2B",kanaal:"Product + Word of mouth",trigger:"Gemak + Social proof",format:"Bottom-up SaaS campagne",mechanism:"Één team begint Slack te gebruiken, collega's sluiten aan, het bedrijf koopt een betaald plan. Viraliteit ingebakken in het product via teamdynamiek. Geen top-down verkoop nodig.",target:"B2B / Teams",feasibility:"🔶"},
+  {n:295,brand:"Zoom",name:"Covid Virality",sector:"Tech / SaaS",kanaal:"Word of mouth + Product",trigger:"Urgentie + Gemak",format:"Crisis-product-market fit",mechanism:"Zoom was de juiste tool op het juiste moment. Gratis laagdrempelig plan als eerste contactpunt. Thuiswerkers installeerden het, bedrijven volgden met betaalde accounts. Crisis als groeimotor.",target:"B2C + B2B breed",feasibility:"🔶"},
+  {n:296,brand:"Robinhood",name:"Waitlist Referral",sector:"Finance / Tech",kanaal:"Email + Direct",trigger:"Exclusiviteit + FOMO",format:"Wachtlijst als campagne",mechanism:"Robinhood lanceerde met een wachtlijst: je positie verbeterde door vrienden uit te nodigen. Schaarste-gevoel gecreëerd voor een app die gratis is. 1M mensen op wachtlijst vóór lancering.",target:"B2C / 20-40",feasibility:"🔶"},
+  {n:297,brand:"Product Hunt",name:"Launch Day Culture",sector:"Tech / Community",kanaal:"Platform + Email + Social",trigger:"FOMO + Belonging",format:"Community launch platform",mechanism:"Product Hunt maakte van een product-lancering een cultureel event. Makers, investors en early adopters samenbrengen op één dag. Upvotes als sociale valuta. Lanceerdag als mediamoment.",target:"B2C + B2B / Tech",feasibility:"🔶"},
+  {n:298,brand:"BuzzFeed",name:"Quiz Viral Engine",sector:"Media / Content",kanaal:"Social + Website",trigger:"Identiteit + Curiositeit",format:"Virale quiz content",mechanism:"'Welke Friends-personage ben jij?' genereerde massale sociale deling. Identity-based quizzen triggeren ego en sociale vergelijking. Content gemaakt om gedeeld te worden, niet om gelezen te worden.",target:"B2C / 18-40",feasibility:"✅"},
+  {n:299,brand:"Typeform",name:"Beautiful Questions",sector:"SaaS / B2B",kanaal:"Product + Social + PR",trigger:"Identiteit + Esthetiek",format:"Design-gedreven product campagne",mechanism:"Typeform maakt formulieren mooi. 'Je verdient betere formulieren' als positionering in een segment vol lelijke tools. Design als USP in B2B. Gebruikers promoten het product omdat het er goed uitziet.",target:"B2B / Marketeers + Onderzoekers",feasibility:"🔶"},
+  {n:300,brand:"Duponzoo",name:"Dieren-ID Kaart Quiz",sector:"Retail / Pet",kanaal:"Meta + In-store + WhatsApp",trigger:"Identiteit + Curiositeit + Gamification",format:"Personaliseringquiz campagne",mechanism:"'Welk type baasje ben jij?' quiz genereert een persoonlijke Dieren-ID Kaart en 30-seconden video. Vijf types (Diva, Avonturier, Knuffelkoning, Rebel, BFF). Deelbaar op social, ophaalbaar in winkel. Campagne-mechanic binnen het Duponzopoly-ecosysteem.",target:"B2C / Dierenliefhebbers",feasibility:"✅"},
+];
+
+// ═══════════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════════
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'library') renderLib();
+}
+
+// ═══════════════════════════════════════════
+// BUDGET MODE TOGGLE
+// ═══════════════════════════════════════════
+function setBudgetMode(mode) {
+  document.getElementById('budget-split').style.display = mode === 'split' ? 'block' : 'none';
+  document.getElementById('budget-total').style.display = mode === 'total' ? 'block' : 'none';
+  document.getElementById('btog-split').classList.toggle('active', mode === 'split');
+  document.getElementById('btog-total').classList.toggle('active', mode === 'total');
+}
+
+function getBudgetString() {
+  const splitVisible = document.getElementById('budget-split').style.display !== 'none';
+  if (splitVisible) {
+    const setup = document.getElementById('inp-budget-setup').value;
+    const monthly = document.getElementById('inp-budget-monthly').value;
+    const months = document.getElementById('inp-budget-months').value;
+    if (!setup && !monthly) return '';
+    return `Setup: ${setup || 'open'} | Maandelijks: ${monthly || 'open'} | Looptijd: ${months || 'open'}`;
+  } else {
+    return document.getElementById('inp-budget-total').value;
+  }
+}
+
+// ═══════════════════════════════════════════
+// CHIP TOGGLE — AI chip vs manual chips
+// ═══════════════════════════════════════════
+function toggleChip(el) {
+  el.classList.toggle('selected');
+}
+
+// AI chip: als AI geselecteerd → deselect alle andere
+function toggleAiChip(el, containerId) {
+  const isNowSelected = !el.classList.contains('selected');
+  el.classList.toggle('selected');
+  if (isNowSelected) {
+    document.querySelectorAll(`#${containerId} .chip:not(.chip-ai)`).forEach(c => c.classList.remove('selected'));
+  }
+}
+
+// Manual chip: als manual geselecteerd → deselect AI chip
+function toggleManualChip(el, containerId) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) {
+    const aiChip = document.querySelector(`#${containerId} .chip-ai`);
+    if (aiChip) aiChip.classList.remove('selected');
+  }
+}
+
+function getSelectedChips(containerId) {
+  return [...document.querySelectorAll(`#${containerId} .chip.selected`)].map(c => c.textContent.trim());
+}
+
+// ═══════════════════════════════════════════
+// AI LOOKUP — sector & doelgroep
+// ═══════════════════════════════════════════
+async function aiLookup(type) {
+  const brand = document.getElementById('inp-brand').value.trim();
+  const sector = document.getElementById('inp-sector').value.trim();
+  if (!brand) { alert('Vul eerst de bedrijfsnaam in.'); return; }
+
+  const resultEl = document.getElementById(`ai-result-${type}`);
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = '⏳ Even wachten...';
+  resultEl.innerHTML = '<span style="color:var(--grey);font-size:11px;">AI denkt na...</span>';
+  resultEl.classList.add('visible');
+
+  const prompts = {
+    sector: `Geef voor het bedrijf "${brand}" de meest waarschijnlijke sector/niche in maximaal 5 woorden. Alleen de sector, geen uitleg. Bijvoorbeeld: "Pet retail / dierenwinkels" of "Bouwmaterialen B2B" of "Horeca / restaurant".`,
+    doelgroep: `Geef voor het bedrijf "${brand}"${sector ? ` in de sector "${sector}"` : ''} een concrete doelgroepomschrijving in maximaal 15 woorden. Alleen de omschrijving, geen uitleg. Voorbeeld: "Dierenliefhebbers 25-55 jaar, West-Vlaanderen, middenklasse gezinnen met huisdier"`
+  };
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 100,
+        messages: [{ role: 'user', content: prompts[type] }]
+      })
+    });
+    const data = await response.json();
+    const suggestion = data.content.map(b => b.text || '').join('').trim();
+
+    resultEl.innerHTML = `
+      <div style="color:var(--ember);font-size:12px;margin-bottom:8px;">✦ ${suggestion}</div>
+      <div class="ai-result-actions">
+        <button class="btn-ai-accept" onclick="acceptAiSuggestion('${type}', this)">✓ Overnemen</button>
+        <button class="btn-ai-reject" onclick="rejectAiSuggestion('${type}')">✕ Negeren</button>
+      </div>`;
+    resultEl.dataset.suggestion = suggestion;
+  } catch(e) {
+    resultEl.innerHTML = '<span style="color:#C47B7B;font-size:11px;">Lookup mislukt. Vul handmatig in.</span>';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '✦ AI zoekt op';
+  }
+}
+
+function acceptAiSuggestion(type, btn) {
+  const resultEl = document.getElementById(`ai-result-${type}`);
+  const suggestion = resultEl.dataset.suggestion;
+  const fieldMap = { sector: 'inp-sector', doelgroep: 'inp-target' };
+  document.getElementById(fieldMap[type]).value = suggestion;
+  resultEl.innerHTML = `<span style="color:#6BAF6B;font-size:11px;">✓ Overgenomen</span>`;
+  setTimeout(() => { resultEl.classList.remove('visible'); }, 1500);
+}
+
+function rejectAiSuggestion(type) {
+  const resultEl = document.getElementById(`ai-result-${type}`);
+  resultEl.classList.remove('visible');
+}
+
+// ═══════════════════════════════════════════
+// OPUS API CALL — CAMPAIGN GENERATOR
+// ═══════════════════════════════════════════
+async function generateCampaigns() {
+  const brand = document.getElementById('inp-brand').value.trim();
+  const sector = document.getElementById('inp-sector').value.trim();
+  const target = document.getElementById('inp-target').value.trim();
+  const problem = document.getElementById('inp-problem').value.trim();
+  const goal = document.getElementById('inp-goal').value;
+  const budget = getBudgetString();
+  const kanalenChips = getSelectedChips('chips-kanaal');
+  const aiKiest = kanalenChips.includes('✦ AI kiest zelf') || kanalenChips.length === 0;
+  const kanalen = aiKiest ? [] : kanalenChips;
+  const triggers = getSelectedChips('chips-trigger');
+  const context = document.getElementById('inp-context').value.trim();
+
+  if (!brand || !problem) {
+    alert('Vul minstens Bedrijfsnaam en Kernprobleem in.');
+    return;
+  }
+
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('results-area').style.display = 'none';
+  document.getElementById('loading-state').classList.add('visible');
+  document.getElementById('btn-gen').disabled = true;
+
+  const systemPrompt = `Je bent de campagne-strateeg van Branderij, een premium Belgisch brandingbureau uit Kuurne (West-Vlaanderen). Branderij rekent €96/u. Het team bestaat uit: Aris/Jorrit (Strategie), Day (Video/Foto), Fleur/Alanis (Social/Content/TikTok), Aurelie/Marleen (Design), Ruben/Arthur (Web), Thomas (SEO/Ads).
+
+Je taak: genereer PRECIES 3 doordachte, originele campagne-concepten op basis van de client-input. Elk concept moet:
+1. Een unieke creatieve naam hebben
+2. Gebouwd zijn op een psychologisch bewezen mechanisme (benoem welk)
+3. Geïnspireerd zijn op een bestaande succesvolle campagne (maar origineel vertaald)
+4. Concreet uitvoerbaar zijn voor een KMO-budget in Vlaanderen
+5. Een duidelijk verschil maken vs. wat de concurrent doet
+
+Antwoord UITSLUITEND in dit JSON-formaat (geen tekst errond, geen markdown):
+{
+  "concepts": [
+    {
+      "name": "Campagnenaam",
+      "tagline": "Korte tagline in max 8 woorden",
+      "trigger": "Psychologische trigger(s)",
+      "kanaal": "Kanalen",
+      "format": "Campagne-formaat",
+      "mechanisme": "Uitleg van het kernmechanisme (3-5 zinnen, concreet en scherp)",
+      "vonk": "De Vonk: hoe start je dit voor €2.5k-€7.5k als instapproject (2-3 zinnen)",
+      "vuur": "Het Vuur: de volledige campagne-rollout (3-4 zinnen)",
+      "waakvlam": "De Waakvlam: wat blijft maandelijks lopen voor MRR (2 zinnen)",
+      "inspiratie": ["Campagne 1 die inspireerde", "Campagne 2"],
+      "team": "Welke Branderij teamleden zijn nodig",
+      "budget_setup": "€X.XXX - €X.XXX",
+      "budget_mrr": "€X.XXX/maand",
+      "feasibility": "✅",
+      "rationale": "Waarom werkt dit specifiek voor deze klant en dit probleem? (2-3 zinnen)"
+    }
+  ]
+}
+
+Feasibility: ✅ als direct uitvoerbaar, 🔶 als aanpassingen nodig, ❌ als buiten scope.
+Wees scherp. Geen wollige marketingtaal. Elk woord moet kloppen.`;
+
+  const userPrompt = `KLANT INPUT:
+Bedrijfsnaam: ${brand}
+Sector: ${sector || 'Niet opgegeven — bepaal zelf op basis van de bedrijfsnaam'}
+Doelgroep: ${target || 'Niet opgegeven — bepaal zelf op basis van sector en context'}
+Kernprobleem: ${problem}
+Campagne-doel: ${goal || 'Niet opgegeven'}
+Budget: ${budget || 'Niet opgegeven — werk met realistisch KMO-budget'}
+Voorkeur kanalen: ${aiKiest ? 'AI kiest zelf de meest effectieve kanalen' : kanalen.join(', ')}
+Psychologische triggers voorkeur: ${triggers.length ? triggers.join(', ') : 'Kies zelf de sterkste'}
+Extra context: ${context || 'Geen'}
+
+Genereer 3 maximaal doordachte, originele campagne-concepten. Varieer: één op community/gamification, één op emotie/storytelling, één op een verrassende mechanic. Elk concept moet écht anders zijn.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 4000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+    const rawText = data.content.map(b => b.text || '').join('').trim();
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+    renderConcepts(parsed.concepts, brand, goal);
+  } catch (err) {
+    document.getElementById('results-area').style.display = 'block';
+    document.getElementById('concepts-grid').innerHTML = `<div class="error-state"><div style="font-size:24px;margin-bottom:12px;">⚠️</div><strong>Generatie mislukt</strong><br><br>${err.message}</div>`;
+  } finally {
+    document.getElementById('loading-state').classList.remove('visible');
+    document.getElementById('btn-gen').disabled = false;
+  }
+}
+
+function renderConcepts(concepts, brand, goal) {
+  document.getElementById('results-area').style.display = 'block';
+  document.getElementById('results-meta').textContent = `${brand} — ${concepts.length} concepten — ${new Date().toLocaleTimeString('nl-BE')}`;
+
+  const grid = document.getElementById('concepts-grid');
+  grid.innerHTML = '';
+
+  concepts.forEach((c, i) => {
+    const feasClass = c.feasibility === '✅' ? '' : c.feasibility === '🔶' ? 'style="color:var(--gold)"' : 'style="color:var(--red)"';
+    const feasText = c.feasibility === '✅' ? 'Direct inzetbaar' : c.feasibility === '🔶' ? 'Met aanpassing' : 'Out of scope';
+
+    const refs = (c.inspiratie || []).map(r => `<span class="inspiration-ref">${r}</span>`).join('');
+
+    const card = document.createElement('div');
+    card.className = 'concept-card';
+    card.innerHTML = `
+      <div class="concept-header">
+        <div>
+          <div class="concept-number">CONCEPT ${i+1} / 3</div>
+          <div class="concept-name">${c.name}</div>
+          <div class="concept-tagline">${c.tagline || ''}</div>
+        </div>
+        <div class="concept-feasibility">
+          <div class="feas-icon">${c.feasibility}</div>
+          <span class="feas-label">${feasText}</span>
+        </div>
+      </div>
+
+      <div class="concept-body">
+        <div class="concept-section">
+          <div class="concept-section-title">Kernmechanisme</div>
+          <div class="concept-text">${c.mechanisme}</div>
+          <div class="concept-tags" style="margin-top:12px;">
+            <span class="ctag ctag-trigger">${c.trigger}</span>
+            <span class="ctag ctag-kanaal">${c.kanaal}</span>
+            <span class="ctag ctag-format">${c.format}</span>
+          </div>
+        </div>
+
+        <div class="concept-section">
+          <div class="concept-section-title">Waarom dit werkt voor ${brand}</div>
+          <div class="concept-text">${c.rationale}</div>
+        </div>
+
+        <div class="concept-grid-inner">
+          <div class="concept-block">
+            <div class="concept-block-title">🌟 De Vonk (Instap)</div>
+            <div class="concept-block-value">${c.vonk}</div>
+          </div>
+          <div class="concept-block">
+            <div class="concept-block-title">🔥 Het Vuur (Campagne)</div>
+            <div class="concept-block-value">${c.vuur}</div>
+          </div>
+          <div class="concept-block">
+            <div class="concept-block-title">🕯️ De Waakvlam (MRR)</div>
+            <div class="concept-block-value">${c.waakvlam}</div>
+          </div>
+          <div class="concept-block">
+            <div class="concept-block-title">👥 Team</div>
+            <div class="concept-block-value" style="font-size:12px;">${c.team}</div>
+          </div>
+        </div>
+
+        <div class="concept-grid-inner" style="margin-top:0;">
+          <div class="concept-block" style="text-align:center;">
+            <div class="concept-block-title">Setup budget</div>
+            <div class="price-highlight">${c.budget_setup}</div>
+            <div class="price-sub">excl. btw</div>
+          </div>
+          <div class="concept-block" style="text-align:center;">
+            <div class="concept-block-title">MRR retainer</div>
+            <div class="price-highlight">${c.budget_mrr}</div>
+            <div class="price-sub">per maand</div>
+          </div>
+        </div>
+      </div>
+
+      ${refs ? `
+      <div class="inspiration-strip">
+        <span class="inspiration-label">GEÏNSPIREERD OP ↗</span>
+        ${refs}
+      </div>` : ''}
+
+      <!-- COMPOUND OPTIMALISATIE TRIGGER -->
+      <div class="compound-trigger">
+        <button class="btn-compound" onclick="runCompoundOptimalisatie(${i}, this)">
+          ⚡ COMPOUND OPTIMALISATIE UITVOEREN
+        </button>
+        <div class="compound-hint">160 punten doorlopen · AI-tools selecteren · Budget valideren</div>
+      </div>
+
+      <!-- COMPOUND RAPPORT CONTAINER -->
+      <div class="compound-rapport" id="compound-${i}" style="display:none;"></div>
+    `;
+    grid.appendChild(card);
+    // Store concept data on element for later retrieval
+    card.dataset.concept = JSON.stringify(c);
+    card.dataset.idx = i;
+  });
+
+  document.getElementById('results-area').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ═══════════════════════════════════════════
+// LIBRARY — grouped filter rendering
+// ═══════════════════════════════════════════
+
+const SECTOR_GROUPS = {
+  'g-retail':  c => /retail|e-com|e-commerce|brico|interieur/i.test(c.sector),
+  'g-food':    c => /food|beverage|fmcg|horeca|bakkerij/i.test(c.sector),
+  'g-b2b':     c => /^b2b|logistiek|consulting|industrie\/\s*b2b|energie/i.test(c.sector),
+  'g-saas':    c => /saas|fintech|^tech/i.test(c.sector),
+  'g-finance': c => /finance|insurance|bank/i.test(c.sector),
+  'g-sport':   c => /sport|events|toerisme|hospitality|travel/i.test(c.sector),
+  'g-fashion': c => /fashion|luxe|automotive|mobiliteit/i.test(c.sector),
+  'g-media':   c => /media|onderwijs|edtech|gaming|podcast|radio/i.test(c.sector),
+  'g-ngo':     c => /ngo|overheid/i.test(c.sector),
+  'g-health':  c => /health|gezondheid|pharma|zorg/i.test(c.sector),
+};
+
+const TRIGGER_GROUPS = {
+  'g-identiteit': c => /identiteit|trots|empower|anti-estab|subcultuur/i.test(c.trigger),
+  'g-sociaal':    c => /belonging|social proof|co-creation|sociale norm/i.test(c.trigger),
+  'g-schaarste':  c => /fomo|loss aversion|exclusiviteit|schaarste|urgentie/i.test(c.trigger),
+  'g-emotie':     c => /emotie|nostalgie|humor|verrassing|warmte|romantiek/i.test(c.trigger),
+  'g-waarden':    c => /waarden|purpose|duurzaamheid|eerlijkheid|transparantie|herkomst|vakmanschap/i.test(c.trigger),
+  'g-rationeel':  c => /vertrouwen|educatie|authority|bewijs|data|kostenreductie|tijdsbesparing|gemak/i.test(c.trigger),
+  'g-game':       c => /gamification|competitie|challenge|incentive/i.test(c.trigger),
+};
+
+function renderLib() {
+  const q = document.getElementById('lib-search').value.toLowerCase();
+  const sectorVal = document.getElementById('lib-sector').value;
+  const triggerVal = document.getElementById('lib-trigger').value;
+  const feas = document.getElementById('lib-feas').value;
+
+  const filtered = LIBRARY.filter(c => {
+    const text = `${c.brand} ${c.name} ${c.mechanism} ${c.target} ${c.format} ${c.sector} ${c.trigger}`.toLowerCase();
+    if (q && !text.includes(q)) return false;
+    if (sectorVal) {
+      if (SECTOR_GROUPS[sectorVal]) { if (!SECTOR_GROUPS[sectorVal](c)) return false; }
+      else if (!c.sector.toLowerCase().includes(sectorVal.toLowerCase())) return false;
+    }
+    if (triggerVal) {
+      if (TRIGGER_GROUPS[triggerVal]) { if (!TRIGGER_GROUPS[triggerVal](c)) return false; }
+      else if (!c.trigger.toLowerCase().includes(triggerVal.toLowerCase())) return false;
+    }
+    if (feas && c.feasibility !== feas) return false;
+    return true;
+  });
+
+  document.getElementById('ls-visible').textContent = filtered.length;
+  document.getElementById('ls-yes').textContent = filtered.filter(c => c.feasibility === '✅').length;
+  document.getElementById('ls-adapt').textContent = filtered.filter(c => c.feasibility === '🔶').length;
+  document.getElementById('ls-no').textContent = filtered.filter(c => c.feasibility === '❌').length;
+
+  const grid = document.getElementById('lib-grid');
+  grid.innerHTML = '';
+
+  if (!filtered.length) {
+    grid.innerHTML = '<div class="lib-empty" style="color:#444;padding:60px;text-align:center;">Geen campagnes gevonden. Pas de filters aan.</div>';
+    return;
+  }
+
+  filtered.forEach(c => {
+    const fc = c.feasibility === '✅' ? 'lf-yes' : c.feasibility === '🔶' ? 'lf-adapt' : 'lf-no';
+    const ft = c.feasibility === '✅' ? 'Direct' : c.feasibility === '🔶' ? 'Met aanpassing' : 'Out of scope';
+    const div = document.createElement('div');
+    div.className = 'lib-card';
+    div.innerHTML = `
+      <div class="lib-card-top">
+        <div class="lib-brand">${c.brand}</div>
+        <div class="lib-feas">${c.feasibility}</div>
+      </div>
+      <div class="lib-campaign-name">↳ ${c.name}</div>
+      <div class="lib-mechanism">${c.mechanism}</div>
+      <div class="lib-tags">
+        <span class="ltag ltag-sector">${c.sector}</span>
+        <span class="ltag ltag-kanaal">${c.kanaal}</span>
+        <span class="ltag ltag-trigger">${c.trigger}</span>
+        <span class="ltag ltag-format">${c.format}</span>
+      </div>
+      <div class="lib-card-footer">
+        <span class="lib-num">#${String(c.n).padStart(3,'0')}</span>
+        <span class="lib-feas-label ${fc}">${ft}</span>
+      </div>`;
+    grid.appendChild(div);
+  });
+}
+
+function resetLib() {
+  document.getElementById('lib-search').value = '';
+  document.getElementById('lib-sector').value = '';
+  document.getElementById('lib-trigger').value = '';
+  document.getElementById('lib-feas').value = '';
+  renderLib();
+}
+
+function exportCSV() {
+  const q = document.getElementById('lib-search').value.toLowerCase();
+  const sector = document.getElementById('lib-sector').value;
+  const trigger = document.getElementById('lib-trigger').value;
+  const feas = document.getElementById('lib-feas').value;
+  const filtered = LIBRARY.filter(c => {
+    const text = `${c.brand} ${c.name} ${c.mechanism} ${c.target}`.toLowerCase();
+    return (!q || text.includes(q)) && (!sector || c.sector === sector) && (!trigger || c.trigger === trigger) && (!feas || c.feasibility === feas);
+  });
+  const header = ['#','Merk','Campagne','Sector','Kanaal','Trigger','Formaat','Mechanisme','Doelgroep','Haalbaarheid'];
+  const rows = filtered.map(c => [c.n, c.brand, c.name, c.sector, c.kanaal, c.trigger, c.format, `"${c.mechanism.replace(/"/g,'""')}"`, c.target, c.feasibility]);
+  const csv = [header, ...rows].map(r => r.join(';')).join('\n');
+  const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = 'branderij_campagne_bibliotheek.csv'; a.click();
+}
+
+// ═══════════════════════════════════════════
+// COMPOUND OPTIMALISATIE ENGINE
+// 160 punten | 16 disciplines | Budget-check
+// ═══════════════════════════════════════════
+
+const COE_DISCIPLINES = [
+  { id:1, name:"Strategie & Positionering", range:[1,12], max:12 },
+  { id:2, name:"Branding & Visuele Identiteit", range:[13,24], max:12 },
+  { id:3, name:"Copywriting & Messaging", range:[25,40], max:16 },
+  { id:4, name:"Paid Media & Distributie", range:[41,56], max:16 },
+  { id:5, name:"Website & Conversie", range:[57,68], max:12 },
+  { id:6, name:"SEO & Organisch", range:[69,76], max:8 },
+  { id:7, name:"Social Media Organisch", range:[77,86], max:10 },
+  { id:8, name:"E-mail, WhatsApp & Automation", range:[87,93], max:7 },
+  { id:9, name:"Fysieke Activatie & Guerrilla", range:[94,100], max:7 },
+  { id:10, name:"Data & Analytics", range:[101,112], max:12 },
+  { id:11, name:"AI Creatieve Optimalisatie", range:[113,120], max:8 },
+  { id:12, name:"CRO Programma", range:[121,130], max:10 },
+  { id:13, name:"Pricing-Psychologie", range:[131,138], max:8 },
+  { id:14, name:"Employer Branding", range:[139,145], max:7 },
+  { id:15, name:"GEO", range:[146,152], max:7 },
+  { id:16, name:"Viraliteit & Community", range:[153,160], max:8 },
+];
+
+const COE_SYSTEM_PROMPT = `Je bent de Compound Optimalisatie Engine van Branderij — een intern systeem dat campagnes beoordeelt op 160 optimalisatiepunten verdeeld over 16 disciplines.
+
+CONTEXT BRANDERIJ:
+- Belgisch brandingbureau, Kuurne (West-Vlaanderen)
+- Uurtarief: €96/u
+- Team: Aris/Jorrit (Strategie), Day (Video/Foto), Fleur/Alanis (Social/Content/TikTok), Aurelie/Marleen (Design), Ruben/Arthur (Web), Thomas (SEO/Ads), Jencey (Sales/PM)
+
+DE 160 PUNTEN (verkorte referentie per discipline):
+Disc 1 (1-12): Strategie & Positionering — ICP, USP, concurrentie, positionering, buyer journey
+Disc 2 (13-24): Branding & Visuele Identiteit — logo, kleuren, typografie, stijl, merkgids
+Disc 3 (25-40): Copywriting & Messaging — headline, hook, CTA, toon, storytelling, A/B copy
+Disc 4 (41-56): Paid Media — Meta setup, targeting, budgetverdeling, A/B ads, retargeting, lookalike
+Disc 5 (57-68): Website & Conversie — LP snelheid, CTA, above fold, social proof, formulier
+Disc 6 (69-76): SEO — zoekwoordenonderzoek, on-page, lokaal SEO, backlinks
+Disc 7 (77-86): Social Media Organisch — contentstrategie, frequentie, engagement, UGC
+Disc 8 (87-93): E-mail & WhatsApp — lijst, automation, welkomstserie, segmentatie, WhatsApp broadcast
+Disc 9 (94-100): Fysieke Activatie — in-store, QR codes, guerrilla, events, sampling
+Disc 10 (101-112): Data & Analytics — GA4, server-side tracking, attributie, dashboard, cohorten, GDPR
+Disc 11 (113-120): AI Creatieve Optimalisatie — AI ad creative, copy varianten, video, DCO, fatigue monitoring
+Disc 12 (121-130): CRO — heatmaps, session recordings, A/B tests, form analytics, speed, social proof dynamisch
+Disc 13 (131-138): Pricing-Psychologie — Good/Better/Best, anchoring, loss framing, ROI-calc, urgentie offerte
+Disc 14 (139-145): Employer Branding — TikTok team-content, vacatureteksten, medewerker-ambassadeurs, Meta recruitment
+Disc 15 (146-152): GEO — schema.org, entity-modelling, FAQ-secties, AI-citatie monitoring, topical authority
+Disc 16 (153-160): Viraliteit & Community — deelbaarheid, interactieve content, community, contest, lokale samenwerking, earned media, guerrilla, UGC loop
+
+BUDGET TOOL PRIJZEN (maandelijks tenzij anders):
+GA4/Looker Studio: gratis | Microsoft Clarity: gratis | Canva Pro: €12 | Cookiebot: €12 | Stape.io: €10 | AdCreative.ai: €39 | Pencil: €14 | Madgicx: €44 | Revealbot: €50 | Surfer SEO: €89 | Ahrefs: €99 | Semrush: €130 | Hotjar: €0 (free) | HeyGen: €24 | Captions: €10 | Descript: €24 | Photoroom: €10 | ActiveCampaign: €29 | Klaviyo: €20 | Woodpecker: €29 | Supermetrics: €40 | Later: €25 | Metricool: €15 | Predis.ai: €29 | Outgrow: €14 | Gleam: €10 | ShortStack: €29 | VWO: €339 | Pathmonk: €400 | Unbounce: €74 | Jasper: €49 | MarketMuse: €149 | Cometly: €€€ (duur) | Teamleader: €25
+
+JOUW TAAK:
+Analyseer het campagne-concept en budget. Doorloop alle 160 punten. Output UITSLUITEND JSON zonder markdown of backticks:
+
+{
+  "score_totaal": 0,
+  "score_max": 160,
+  "budget_setup_num": 0,
+  "budget_mrr_num": 0,
+  "budget_maanden": 0,
+  "budget_totaal_check": 0,
+  "disciplines": [
+    {
+      "id": 1,
+      "naam": "Strategie & Positionering",
+      "score": 0,
+      "max": 12,
+      "toegepast": [
+        { "punt": 1, "element": "Naam van het punt", "invulling": "Concrete invulling voor deze campagne", "tool": "Tool of 'handmatig'" }
+      ],
+      "overgeslagen": [
+        { "punt": 2, "element": "Naam", "reden": "budget" }
+      ]
+    }
+  ],
+  "ai_tools_ingezet": [
+    { "tool": "Toolnaam", "discipline": "Disc naam", "kost_maand": 0, "past_in_budget": true, "gebruik": "Waarvoor precies" }
+  ],
+  "compound_impact": {
+    "score_niveau": "Goed (50-75%)",
+    "geschatte_ctr_boost": "+X%",
+    "geschatte_conversie_boost": "+X%",
+    "geschatte_bereik_boost": "+X%",
+    "totale_tool_kost_maand": 0,
+    "totale_tool_kost_looptijd": 0,
+    "past_in_budget": true,
+    "toelichting": "2-3 zinnen over de compound impact van de gekozen optimalisaties"
+  }
+}
+
+REGELS:
+1. Pas ALLEEN punten toe die relevant zijn voor het campagnetype, doelgroep en budget
+2. Reden voor overslaan: "budget" (tool te duur), "niet-relevant" (verkeerde sector/type), "bestaand" (klant heeft dit al), "latere fase" (te vroeg voor dit stadium)
+3. Budget: trek de toolkosten AF van het beschikbare budget. Als tools het budget overschrijden: kies de goedkoopste combinatie
+4. Sla employer branding (139-145) over als de campagne geen HR-doel heeft
+5. Sla GEO (146-152) over als het budget <€5k setup is (te vroeg)
+6. Wees concreet: geen abstracte beschrijvingen, maar exacte invulling voor DEZE campagne
+7. Eindscore: tel alle toegepaste punten op`;
+
+async function runCompoundOptimalisatie(idx, btn) {
+  // Find the concept card
+  const card = document.querySelector(`.concept-card[data-idx="${idx}"]`);
+  if (!card) return;
+
+  const concept = JSON.parse(card.dataset.concept || '{}');
+  const rapport = document.getElementById(`compound-${idx}`);
+  const brand = document.getElementById('inp-brand').value.trim();
+  const sector = document.getElementById('inp-sector').value.trim();
+  const target = document.getElementById('inp-target').value.trim();
+  const problem = document.getElementById('inp-problem').value.trim();
+  const budget = getBudgetString();
+  const goal = document.getElementById('inp-goal').value;
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Analyseren...';
+
+  rapport.style.display = 'block';
+  rapport.innerHTML = `
+    <div class="cr-loading">
+      <div class="cr-loading-bars">
+        <div class="cr-lb"></div><div class="cr-lb"></div><div class="cr-lb"></div>
+        <div class="cr-lb"></div><div class="cr-lb"></div>
+      </div>
+      <div class="cr-loading-text">160 PUNTEN DOORLOPEN...</div>
+      <div class="cr-loading-sub">Opus analyseert relevantie, budget en AI-tools · 30-60 seconden</div>
+    </div>`;
+
+  rapport.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const userPrompt = `CAMPAGNE CONCEPT:
+Naam: ${concept.name || 'Onbekend'}
+Tagline: ${concept.tagline || ''}
+Formaat: ${concept.format || ''}
+Kanalen: ${concept.kanaal || ''}
+Trigger: ${concept.trigger || ''}
+Mechanisme: ${concept.mechanisme || ''}
+Team: ${concept.team || ''}
+Budget setup: ${concept.budget_setup || 'Niet opgegeven'}
+Budget MRR: ${concept.budget_mrr || 'Niet opgegeven'}
+
+KLANT CONTEXT:
+Bedrijf: ${brand}
+Sector: ${sector || 'Niet opgegeven'}
+Doelgroep: ${target || 'Niet opgegeven'}
+Kernprobleem: ${problem}
+Campagne-doel: ${goal || 'Niet opgegeven'}
+Totaal beschikbaar budget: ${budget || 'Niet opgegeven'}
+
+Loop alle 160 punten door. Wees concreet en specifiek voor DEZE campagne. Check het budget hard.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-opus-4-6',
+        max_tokens: 8000,
+        system: COE_SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: userPrompt }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) throw new Error(data.error.message);
+
+    const rawText = data.content.map(b => b.text || '').join('').trim();
+    const clean = rawText.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    renderCompoundRapport(rapport, parsed, concept.name, brand);
+
+  } catch(err) {
+    rapport.innerHTML = `<div style="padding:28px;color:#C47B7B;font-size:13px;">
+      <strong>⚠️ Compound analyse mislukt</strong><br><br>${err.message}<br><br>
+      <small style="color:#555;">Probeer opnieuw. Als het probleem aanhoudt, controleer je verbinding.</small>
+    </div>`;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '⚡ OPNIEUW OPTIMALISEREN';
+  }
+}
+
+function renderCompoundRapport(container, data, conceptName, brand) {
+  const pct = Math.round((data.score_totaal / data.score_max) * 100);
+  const niveau = pct < 25 ? 'Onvoldoende' : pct < 50 ? 'Basis' : pct < 75 ? 'Goed' : 'Expert';
+  const niveauColor = pct < 25 ? '#C47B7B' : pct < 50 ? '#D4A843' : pct < 75 ? '#7BB8E8' : '#4CAF7D';
+
+  // Build disciplines HTML
+  let discHTML = '';
+  const allApplied = [];
+  const allSkipped = [];
+
+  (data.disciplines || []).forEach(disc => {
+    const discPct = Math.round(((disc.score || 0) / disc.max) * 100);
+    const applied = disc.toegepast || [];
+    const skipped = disc.overgeslagen || [];
+    applied.forEach(a => allApplied.push({ ...a, disc: disc.naam }));
+    skipped.forEach(s => allSkipped.push({ ...s, disc: disc.naam }));
+
+    if (applied.length === 0) return; // skip empty disciplines
+
+    discHTML += `
+      <div class="cr-discipline">
+        <div class="cr-disc-header">
+          <span class="cr-disc-name">${disc.naam}</span>
+          <span class="cr-disc-score">${disc.score}/${disc.max} (${discPct}%)</span>
+        </div>
+        <div class="cr-disc-bar"><div class="cr-disc-bar-fill" style="width:${discPct}%;background:${discPct>66?'#4CAF7D':discPct>33?'#D4A843':'#C47B7B'}"></div></div>
+        <div class="cr-items">
+          ${applied.map(a => `
+            <div class="cr-item">
+              <span class="cr-item-num">#${a.punt}</span>
+              <span class="cr-item-text"><strong style="color:var(--light)">${a.element}</strong> — ${a.invulling}</span>
+              <span class="cr-tool-tag">${a.tool}</span>
+            </div>`).join('')}
+          ${skipped.length ? skipped.map(s => `
+            <div class="cr-skip-item">
+              <span class="cr-item-num">#${s.punt}</span>
+              <span class="cr-item-text" style="color:#555;">${s.element}</span>
+              <span class="cr-skip-tag">${s.reden}</span>
+            </div>`).join('') : ''}
+        </div>
+      </div>`;
+  });
+
+  // Tools HTML
+  const tools = data.ai_tools_ingezet || [];
+  const toolsHTML = tools.map(t => `
+    <div class="cr-tool-card">
+      <div class="cr-tool-name">${t.tool}</div>
+      <div class="cr-tool-disc">${t.discipline}</div>
+      <div class="cr-tool-cost">${t.kost_maand === 0 ? 'Gratis' : `€${t.kost_maand}/m`}</div>
+      <div class="cr-tool-use">${t.gebruik}</div>
+      <span class="${t.past_in_budget ? 'fits-yes' : 'fits-no'}">${t.past_in_budget ? '✓ Past in budget' : '✕ Over budget'}</span>
+    </div>`).join('');
+
+  // Impact HTML
+  const impact = data.compound_impact || {};
+  const impactHTML = `
+    <div class="cr-impact-grid">
+      <div class="cr-impact-item">
+        <div class="cr-impact-val">${impact.geschatte_ctr_boost || '?'}</div>
+        <div class="cr-impact-lbl">CTR BOOST</div>
+        <div class="cr-impact-desc">Verwachte verbetering klikratio door compound optimalisaties</div>
+      </div>
+      <div class="cr-impact-item">
+        <div class="cr-impact-val">${impact.geschatte_conversie_boost || '?'}</div>
+        <div class="cr-impact-lbl">CONVERSIE BOOST</div>
+        <div class="cr-impact-desc">Verwachte verbetering conversieratio op landing pages</div>
+      </div>
+      <div class="cr-impact-item">
+        <div class="cr-impact-val">${impact.geschatte_bereik_boost || '?'}</div>
+        <div class="cr-impact-lbl">BEREIK BOOST</div>
+        <div class="cr-impact-desc">Verwacht organisch extra bereik door viraliteit + SEO</div>
+      </div>
+      <div class="cr-impact-item">
+        <div class="cr-impact-val">€${(impact.totale_tool_kost_maand || 0).toLocaleString('nl-BE')}</div>
+        <div class="cr-impact-lbl">TOOLKOST/MAAND</div>
+        <div class="cr-impact-desc">Totale maandkost aanbevolen AI-tools</div>
+      </div>
+      <div class="cr-impact-item">
+        <div class="cr-impact-val">${impact.past_in_budget ? '✅' : '⚠️'}</div>
+        <div class="cr-impact-lbl">BUDGET CHECK</div>
+        <div class="cr-impact-desc">${impact.past_in_budget ? 'Alle tools passen binnen het opgegeven budget' : 'Pas toolselectie aan — budget overschreden'}</div>
+      </div>
+      <div class="cr-impact-item" style="grid-column: span 2;">
+        <div class="cr-impact-val" style="font-size:18px;font-family:'DM Sans',sans-serif;color:${niveauColor}">${niveau.toUpperCase()}</div>
+        <div class="cr-impact-lbl">CAMPAGNE NIVEAU</div>
+        <div class="cr-impact-desc">${impact.toelichting || ''}</div>
+      </div>
+    </div>`;
+
+  container.innerHTML = `
+    <!-- RAPPORT HEADER -->
+    <div class="cr-header">
+      <div>
+        <div class="cr-title">⚡ COMPOUND OPTIMALISATIE RAPPORT</div>
+        <div class="cr-meta">
+          Campagne: ${conceptName} · Klant: ${brand}<br>
+          Gegenereerd: ${new Date().toLocaleString('nl-BE')} · Model: Claude Opus 4.6
+        </div>
+      </div>
+      <div class="cr-score-wrap">
+        <div class="cr-score-num" style="color:${niveauColor}">${data.score_totaal}</div>
+        <div class="cr-score-max">/ ${data.score_max} punten</div>
+        <div style="font-family:'DM Mono',monospace;font-size:10px;margin-top:4px;color:${niveauColor}">${pct}% · ${niveau}</div>
+      </div>
+    </div>
+
+    <!-- PROGRESS BAR -->
+    <div class="cr-progress">
+      <div class="cr-progress-fill" style="width:${pct}%"></div>
+    </div>
+
+    <!-- SECTIE 1: TOEGEPASTE OPTIMALISATIES -->
+    <div class="cr-section">
+      <div class="cr-section-title">
+        ✓ TOEGEPASTE OPTIMALISATIES PER DISCIPLINE
+        <span class="cr-count-badge">${allApplied.length} punten actief</span>
+      </div>
+      ${discHTML || '<div style="color:#555;font-size:13px;">Geen disciplines gevonden.</div>'}
+    </div>
+
+    <!-- SECTIE 2: AI-TOOLS -->
+    <div class="cr-section">
+      <div class="cr-section-title">
+        🤖 AI-TOOLS INGEZET
+        <span class="cr-count-badge">${tools.length} tools</span>
+      </div>
+      <div class="cr-tools-grid">${toolsHTML || '<div style="color:#555;font-size:13px;">Geen tools geselecteerd.</div>'}</div>
+    </div>
+
+    <!-- SECTIE 3: OVERGESLAGEN -->
+    <div class="cr-section">
+      <div class="cr-section-title">
+        ○ BEWUST OVERGESLAGEN
+        <span class="cr-count-badge">${allSkipped.length} punten</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        ${allSkipped.map(s => `
+          <div class="cr-skip-item">
+            <span class="cr-item-num">#${s.punt}</span>
+            <span style="color:#555;font-size:12px;">${s.element} <span style="color:#333;">(${s.disc})</span></span>
+            <span class="cr-skip-tag">${s.reden}</span>
+          </div>`).join('') || '<div style="color:#555;font-size:13px;">Alle relevante punten zijn toegepast.</div>'}
+      </div>
+    </div>
+
+    <!-- SECTIE 4: COMPOUND IMPACT -->
+    <div class="cr-section" style="border-bottom:none;">
+      <div class="cr-section-title">📈 VERWACHTE COMPOUND IMPACT</div>
+      ${impactHTML}
+    </div>`;
+}
+
+// INIT
+renderLib();
+</script>
+</body>
+</html>
